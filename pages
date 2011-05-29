@@ -1,0 +1,10 @@
+/                   home. Create an event wall.
+/users/x            user page for user x
+/y                  wall for event y
+
+
+Home:
+    - Create a wall
+
+New Wall:
+    
