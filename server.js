@@ -2,7 +2,7 @@ var express = require('express');
 var app = express.createServer();
 
 function simpleServer(req, res) {
-  res.send("You see me");
+  res.render('wall/list.jade');
 }
 
 app.get("/", simpleServer);
