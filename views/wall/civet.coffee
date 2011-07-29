@@ -1,7 +1,5 @@
 h1 'Civet Sandbox'
 
-a id: 'render_button', href: '#', 'Render!'
-
 div id: 'stuff'
 
 
