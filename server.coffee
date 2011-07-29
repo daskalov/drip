@@ -11,8 +11,8 @@ app.use express.static(__dirname + '/public')
 client = redis.createClient()
 nohm.setClient(client)
 everyone = nowjs.initialize app
-civet = require('./civet').civet
-civet.setNow(everyone)
+civet = require './civet'
+civet.setNow everyone
 
 # Nohm
 Wall = nohm.model 'Wall'
@@ -24,22 +24,38 @@ Wall = nohm.model 'Wall'
       type: 'integer'
 
 wallFinder = new Wall()
+allWalls = (cbak) ->
+  wallFinder.find (err, ids) ->
+    cbak ids
+wallById = (id, cbak) ->
+  newW = new Wall()
+  newW.load id, (err) ->
+    console.log err if err?
+    cbak newW
+allWallObjects = (cbak) ->
+  nm = []
+  allWalls (ids) ->
+    ids.forEach (id) ->
+      wallById id, (w) ->
+        nm.push w
+        cbak nm if nm.length >= ids.length
+wallNames = (cbak) ->
+  allWallObjects (obs) ->
+    cbak obs.map (o) -> o.p('name')
+
+makeLookLikeObject = (obs) ->
+  obs.map (o) -> name: o.p('name')
+
 
 # Civet client definitions
 civet.component 'walls:list'
   render: ->
     ul ->
-      li 'one 1'
-      li 'two 2'
-    ul ->
-      for ann in animals
-        li ann
-    ul ->
-      for ii in ids
-        li ids
+      walls.forEach (w) ->
+        li w.name
   scope: (retScope) ->
-    wallFinder.find (err, ids) ->
-      retScope { ids: ids, animals: ['cat', 'dog', 'pig'] }
+    allWallObjects (obs) ->
+      retScope walls: makeLookLikeObject obs
 
 
 # Router
