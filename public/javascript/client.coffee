@@ -1,6 +1,6 @@
-multiplexer = (comp, fam) ->
-  now.render comp, fam, (x) -> alert x
+civet =
+  renderAll: ->
+    now.render 'walls:list', (ret) ->
+      $('#stuff').append(ret)
 
-$(document).ready ->
-  $('#render_button').click ->
-    now.render 'walls:list', (ret) -> $('#stuff').append(ret)
+now.ready -> civet.renderAll
