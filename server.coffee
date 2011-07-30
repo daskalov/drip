@@ -22,7 +22,6 @@ Wall = nohm.model 'Wall'
       defaultValue: 'default-wall-name'
     key:
       type: 'integer'
-
 wallFinder = new Wall()
 allWalls = (cbak) ->
   wallFinder.find (err, ids) ->
@@ -42,10 +41,8 @@ allWallObjects = (cbak) ->
 wallNames = (cbak) ->
   allWallObjects (obs) ->
     cbak obs.map (o) -> o.p('name')
-
 makeLookLikeObject = (obs) ->
   obs.map (o) -> name: o.p('name')
-
 
 # Civet client definitions
 civet.component 'walls:list'
@@ -61,7 +58,12 @@ civet.component 'walls:title'
   render: ->
     h1 'Hey there, Chap!'
 
+civet.component 'walls:subtitle'
+  render: ->
+    h2 'a hoy hoy!'
+
 # Router
 app.get '/', (req, res) ->
-  res.render 'wall/civet'
+  res.render 'wall/civet', civet.clientHelpers
+
 app.listen 3000
