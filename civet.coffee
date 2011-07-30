@@ -26,6 +26,7 @@ civet = exports
 
 # Adds a component to the components object
 civet.component = (compName, props) ->
+  props.scope ?= (s) -> s {}
   components[compName] = props
 # Sets the now function called by the client
 civet.setNow = (errbody) ->
