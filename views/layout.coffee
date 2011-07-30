@@ -7,6 +7,7 @@ html ->
     script src: '/nowjs/now.js'
     script src: '/javascript/coffeescript.js'
     script src: '/javascript/coffeekup.js'
+    script src: '/javascript/civet-client.js'
     script src: '/javascript/client.js'
   body ->
     div class: 'container', ->
