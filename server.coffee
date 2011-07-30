@@ -45,6 +45,12 @@ makeLookLikeObject = (obs) ->
   obs.map (o) -> name: o.p('name')
 
 # Civet client definitions
+
+civet.component 'walls:add'
+  render: ->
+    input id: 'wall_add'
+    a id: 'wall_add_button', '+ Add', href: "#"
+
 civet.component 'walls:list'
   render: ->
     ul ->

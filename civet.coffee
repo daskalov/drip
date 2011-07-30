@@ -41,4 +41,4 @@ civet.component = (compName, props) ->
 
 # Sets the now function called by the client
 civet.setNow = (errbody) ->
-  errbody.now.render = nowRender
+  errbody.now.civetrender = nowRender
