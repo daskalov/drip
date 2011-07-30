@@ -57,6 +57,9 @@ civet.component 'walls:list'
     allWallObjects (obs) ->
       retScope walls: makeLookLikeObject obs
 
+civet.component 'walls:title'
+  render: ->
+    h1 'Hey there, Chap!'
 
 # Router
 app.get '/', (req, res) ->
