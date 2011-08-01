@@ -1,72 +1,68 @@
-express   = require 'express'
-coffeekup = require 'coffeekup'
-redis     = require 'redis'
-nohm      = require('Nohm').Nohm
-nowjs     = require 'now'
-_         = require 'underscore'
+# Express init
+express = require 'express'
 app = express.createServer()
+app.use express.static(__dirname + '/public')
+# CoffeeKup init
+coffeekup = require 'coffeekup'
 app.register '.coffee', require('coffeekup')
 app.set 'view engine', 'coffee'
-app.use express.static(__dirname + '/public')
-client = redis.createClient()
-nohm.setClient(client)
+# Now init
+nowjs = require 'now'
 everyone = nowjs.initialize app
+# Civet init
 civet = require './civet'
 civet.setNow everyone
+# Mongoose init
+mongoose = require 'mongoose'
+mongoose.connect 'mongodb://localhost/test'
 
-# Nohm
-Wall = nohm.model 'Wall'
-  properties:
-    name:
-      type: 'string'
-      defaultValue: 'default-wall-name'
-    key:
-      type: 'integer'
-wallFinder = new Wall()
+# Mongoose
+Wall = new mongoose.Schema
+  name:
+    type: String
+    default: 'default-name'
+mongoose.model 'Wall', Wall
+WallModel = mongoose.model 'Wall'
+
 allWalls = (cbak) ->
-  wallFinder.find (err, ids) ->
-    cbak ids
-wallById = (id, cbak) ->
-  newW = new Wall()
-  newW.load id, (err) ->
-    console.log err if err?
-    cbak newW
-allWallObjects = (cbak) ->
-  nm = []
-  allWalls (ids) ->
-    ids.forEach (id) ->
-      wallById id, (w) ->
-        nm.push w
-        cbak nm if nm.length >= ids.length
-wallNames = (cbak) ->
-  allWallObjects (obs) ->
-    cbak obs.map (o) -> o.p('name')
-makeLookLikeObject = (obs) ->
-  obs.map (o) -> name: o.p('name')
+  WallModel.update()
+  WallModel.find {}, (err, docs) ->
+    if (err?)
+      cbak err
+    else
+      cbak docs
+
+everyone.now.makeWall = (name, description, cbak) ->
+  w = new WallModel()
+  w.name = name
+  w.description = description
+  w.save (err) ->
+    if err?
+      cbak err
+    else
+      cbak 'Saved!'
+
+everyone.now.getWalls = (cbak) ->
+  WallModel.find {}, (err, docs) -> cbak docs
+
 
 # Civet client definitions
-
 civet.component 'walls:add'
   render: ->
     input id: 'wall_add'
-    a id: 'wall_add_button', '+ Add', href: "#"
+    a id: 'wall_add_button', href: "#", ->
+      '+ Add'
 
 civet.component 'walls:list'
   render: ->
+    h4 "#{ @walls.length }"
     ul ->
-      walls.forEach (w) ->
+      @walls.forEach (w) ->
         li w.name
   scope: (retScope) ->
-    allWallObjects (obs) ->
-      retScope walls: makeLookLikeObject obs
+    allWalls (docs) ->
+      retScope walls: docs
 
-civet.component 'walls:title'
-  render: ->
-    h1 'Hey there, Chap!'
-
-civet.component 'walls:subtitle'
-  render: ->
-    h2 'a hoy hoy!'
 
 # Router
 app.get '/', (req, res) ->
