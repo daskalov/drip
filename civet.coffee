@@ -14,16 +14,16 @@ template = (name) -> components[name].render
 scopeFor = (name) -> components[name].scope
 
 # Function to supply to everyone.now.render
-nowRender = (name, cbak) ->
-  tmpl = template name
+nowRender = (name, markupHandler) ->
+  tmpl        = template name
   extra_scope = scopeFor name
   extra_scope (sc) ->
-    cbak renderTemplate(tmpl, sc)
+    markupHandler renderTemplate(tmpl, sc)
 
 # CoffeeKup render a template with extra scope
 renderTemplate = (tmpl, xtra) ->
-  coffeekup.render tmpl,
-    hardcode: _.extend(helpers, coreHelpers, xtra)
+  hard = { hardcode: _.extend(helpers, coreHelpers) }
+  coffeekup.render tmpl, _.extend(xtra, hard)
 
 # PUBLIC API
 civet = exports
