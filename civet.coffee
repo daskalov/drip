@@ -3,9 +3,7 @@ _ = require 'underscore'
 
 
 helpers = {}
-
-coreHelpers =
-  someVal: 'a val in core helpers'
+coreHelpers = {}
 
 # Holds all renderable components
 components = {}
@@ -26,14 +24,17 @@ renderTemplate = (tmpl, xtra) ->
   hard = { hardcode: _.extend(helpers, coreHelpers) }
   coffeekup.render tmpl, _.extend(xtra, hard)
 
-# PUBLIC API
+
 civet = exports
 
 # Civet helpers for templates
 civet.clientHelpers =
   hardcode:
-    component: (name) ->
-      div civet: 'true', component: name
+    component: (name, props) ->
+      props ?= {}
+      props.civet = 'true'
+      props.component = name
+      div props
 
 # Adds a component to the components object
 civet.component = (compName, props) ->
