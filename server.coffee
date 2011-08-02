@@ -16,6 +16,7 @@ civet.setNow everyone
 mongoose = require 'mongoose'
 mongoose.connect 'mongodb://localhost/test'
 
+
 # Mongoose
 Wall = new mongoose.Schema
   name:
@@ -41,10 +42,6 @@ everyone.now.makeWall = (name, description, cbak) ->
       cbak err
     else
       cbak 'Saved!'
-
-everyone.now.getWalls = (cbak) ->
-  WallModel.find {}, (err, docs) -> cbak docs
-
 
 # Civet client definitions
 civet.component 'walls:add'
