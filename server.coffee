@@ -10,7 +10,7 @@ app.set 'view engine', 'coffee'
 nowjs = require 'now'
 everyone = nowjs.initialize app
 # Drip init
-drip = require './civet'
+drip = require './drip'
 drip.setNow everyone
 # Mongoose init
 mongoose = require 'mongoose'
@@ -63,6 +63,6 @@ drip.component 'walls:list'
 
 # Router
 app.get '/', (req, res) ->
-  res.render 'wall/civet', drip.clientHelpers
+  res.render 'wall/drip', drip.clientHelpers
 
 app.listen 3000
