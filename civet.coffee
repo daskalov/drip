@@ -25,22 +25,22 @@ renderTemplate = (tmpl, xtra) ->
   coffeekup.render tmpl, _.extend(xtra, hard)
 
 
-civet = exports
+drip = exports
 
-# Civet helpers for templates
-civet.clientHelpers =
+# Drip helpers for templates
+drip.clientHelpers =
   hardcode:
     component: (name, props) ->
       props ?= {}
-      props.civet = 'true'
+      props.drip = 'true'
       props.component = name
       div props
 
 # Adds a component to the components object
-civet.component = (compName, props) ->
+drip.component = (compName, props) ->
   props.scope ?= (s) -> s {}
   components[compName] = props
 
 # Sets the now function called by the client
-civet.setNow = (errbody) ->
-  errbody.now.civetrender = nowRender
+drip.setNow = (errbody) ->
+  errbody.now.driprender = nowRender

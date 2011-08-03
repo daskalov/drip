@@ -9,9 +9,9 @@ app.set 'view engine', 'coffee'
 # Now init
 nowjs = require 'now'
 everyone = nowjs.initialize app
-# Civet init
-civet = require './civet'
-civet.setNow everyone
+# Drip init
+drip = require './civet'
+drip.setNow everyone
 # Mongoose init
 mongoose = require 'mongoose'
 mongoose.connect 'mongodb://localhost/test'
@@ -31,7 +31,7 @@ allWalls = (cbak) ->
     if (err?)
       cbak err
     else
-      cbak docs
+      cbak docs.reverse()
 
 everyone.now.makeWall = (name, description, cbak) ->
   w = new WallModel()
@@ -43,14 +43,15 @@ everyone.now.makeWall = (name, description, cbak) ->
     else
       cbak 'Saved!'
 
-# Civet client definitions
-civet.component 'walls:add'
+
+# Drip client definitions
+drip.component 'walls:add'
   render: ->
-    input id: 'wall_add'
+    input id: 'wall_add_input'
     a id: 'wall_add_button', href: "#", ->
       '+ Add'
 
-civet.component 'walls:list'
+drip.component 'walls:list'
   render: ->
     h4 "#{ @walls.length }"
     ul ->
@@ -60,9 +61,8 @@ civet.component 'walls:list'
     allWalls (docs) ->
       retScope walls: docs
 
-
 # Router
 app.get '/', (req, res) ->
-  res.render 'wall/civet', civet.clientHelpers
+  res.render 'wall/civet', drip.clientHelpers
 
 app.listen 3000

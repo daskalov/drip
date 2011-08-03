@@ -1,15 +1,15 @@
-civet = window.civet = (->
+drip = window.drip = (->
   components = {}
 
-  # Augment jQuery selector with civet properties
-  # Represent a single civet component
+  # Augment jQuery selector with drip properties
+  # Represent a single drip component
   component = (sel) ->
-    comp = sel.civet = {}
+    comp = sel.drip = {}
     name = sel.attr('component')
 
     # Fetch server-side markup
     sync = (afterSync) ->
-      now.civetrender name, (mk) ->
+      now.driprender name, (mk) ->
         comp.markup = mk
         afterSync() if afterSync?
 
@@ -35,12 +35,12 @@ civet = window.civet = (->
     comp = component(sel)
     comp.render fn
 
-  # Retrieve all civet components in the DOM
+  # Retrieve all drip components in the DOM
   allPageComponents = ->
     els = _.map($('*'), (e) -> $(e))
-    _.filter els, (e) -> isCivet e
+    _.filter els, (e) -> isDrip e
 
-  # Render all civet components on the page
+  # Render all drip components on the page
   renderAll = (fn) ->
     comps = allPageComponents()
     _.last(comps).isLast = true
@@ -48,8 +48,8 @@ civet = window.civet = (->
       renderComponent sel, ->
         fn() if fn? and sel.isLast
 
-  # true if a jQuery selector represents a civet object
-  isCivet = (sel) -> sel.attr('civet') == 'true'
+  # true if a jQuery selector represents a drip object
+  isDrip = (sel) -> sel.attr('drip') == 'true'
 
   # exposed interface
   {
@@ -63,7 +63,7 @@ civet = window.civet = (->
     refresh: (name) ->
       if name? components[name].render()
       else     renderAll()
-    # Get a civet component by name
+    # Get a drip component by name
     component: (name) ->
       components[name]
   }
