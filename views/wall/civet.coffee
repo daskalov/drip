@@ -1,4 +1,4 @@
 h1 'Civet Sandbox'
 
-component 'walls:add'
-component 'walls:list', id: 'walls_list_civet'
+component 'walls:add', id: 'add'
+component 'walls:list', id: 'list'
