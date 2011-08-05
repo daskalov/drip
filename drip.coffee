@@ -3,7 +3,23 @@ _ = require 'underscore'
 
 
 helpers = {}
-coreHelpers = {}
+
+# Helpers available to templates provided
+# by any drip component
+coreHelpers =
+  # Ad-hoc form useful in packaging groups of
+  # user-submitted values
+  dripForm: (inner) ->
+    div dripform: 'true', id: 'drip_form', ->
+      inner()
+  # Allow a drip template to specify
+  # actions to perform immediately after render
+  postRender: (inner) ->
+    # Set up environment before component specific calls
+    coffeescript ->
+      window.testInPostRender = -> alert 'am in postRender'
+    # Component-specific calls
+    coffeescript inner
 
 # Holds all renderable components
 components = {}
@@ -12,18 +28,19 @@ components = {}
 template = (name) -> components[name].render
 scopeFor = (name) -> components[name].scope
 
-# Function to supply to everyone.now.render
+# Main render function
+# Renders a drip component's template with
+# the scope specified by the component in scope
 nowRender = (name, markupHandler) ->
   tmpl        = template name
-  extra_scope = scopeFor name
-  extra_scope (sc) ->
+  extraScope = scopeFor name
+  extraScope (sc) ->
     markupHandler renderTemplate(tmpl, sc)
 
 # CoffeeKup render a template with extra scope
 renderTemplate = (tmpl, xtra) ->
   hard = { hardcode: _.extend(helpers, coreHelpers) }
   coffeekup.render tmpl, _.extend(xtra, hard)
-
 
 drip = exports
 
