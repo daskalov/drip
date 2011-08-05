@@ -22,44 +22,67 @@ Wall = new mongoose.Schema
   name:
     type: String
     default: 'default-name'
+  description:
+    type: String
+    default: 'None Given.'
 mongoose.model 'Wall', Wall
 WallModel = mongoose.model 'Wall'
 
-allWalls = (cbak) ->
-  WallModel.update()
+WallModel.all = (cbak) ->
   WallModel.find {}, (err, docs) ->
-    if (err?)
-      cbak err
-    else
-      cbak docs.reverse()
+    if err? cbak err
+    else    cbak docs.reverse()
 
-everyone.now.makeWall = (name, description, cbak) ->
+WallModel.makeWall = (props, cbak) ->
   w = new WallModel()
-  w.name = name
-  w.description = description
+  w.name = props.name
+  w.description = props.description
   w.save (err) ->
-    if err?
-      cbak err
-    else
-      cbak 'Saved!'
+    if err? cbak err
+    else    cbak 'Saved!'
 
 
-# Drip client definitions
+# Now
+everyone.now.makeWall = WallModel.makeWall
+
+everyone.now.test = (fromClient) ->
+  cid = @user.clientId
+  console.log "Got #{fromClient} from client"
+  console.log "cid: #{cid}"
+  everyone.now.clientTest()
+
+everyone.now.bindStuff = ->
+  @now.wallBind "var ff = function () { return alert('From se!'); }"
+
+# nowjs.on 'connect', -> this.now.clientConnect()
+
+
+# Drip
 drip.component 'walls:add'
   render: ->
-    input id: 'wall_add_input'
-    a id: 'wall_add_button', href: "#", ->
+    dripForm ->
+      input id: 'wall_name', drip: 'wall-name', name: 'name'
+      input id: 'wall_description', drip: 'desc', name: 'description'
+    a id: 'button', href: "#", drip: 'button', ->
       '+ Add'
 
 drip.component 'walls:list'
   render: ->
     h4 "#{ @walls.length }"
+    a id: 'test_button', 'Test'
     ul ->
       @walls.forEach (w) ->
         li w.name
-  scope: (retScope) ->
-    allWalls (docs) ->
-      retScope walls: docs
+        li w.description
+        br ''
+
+    postRender -> drip.events.add ->
+      alert 'a'
+      alert 'b'
+
+  scope: (s) ->
+    WallModel.all (docs) ->
+      s walls: docs
 
 # Router
 app.get '/', (req, res) ->
