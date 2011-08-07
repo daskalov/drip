@@ -2,23 +2,46 @@ drip = window.drip = (->
   components = {}
   renderedOnce = false
 
+  dripId =
+    GUID_SEPERATOR: '___'
+    dripToGuid: (cname, dripId) ->
+      "#{cname}#{@GUID_SEPERATOR}#{dripId}"
+    guidToDrip: (gu) ->
+      return undefined unless gu?
+      parts = gu.split @GUID_SEPERATOR
+      name: parts[0]
+      drip: parts[1]
+
   # Augment jQuery selector with drip properties
-  # Represent a single drip component
+  # Represents a single drip component
   component = (sel) ->
     comp = sel.drip = {}
     name = sel.attr 'component'
 
-    # Fetch server-side markup
-    sync = (afterSync) ->
-      now.driprender name, (mk) ->
-        comp.markup = mk
-        afterSync() if afterSync?
+    # Retrieve an element from the component by drip id
+    byDrip = (dId) ->
+      els = _.filter $('*'), (e) ->
+        guid = $(e).attr('guid')
+        parts = dripId.guidToDrip guid
+        pred = -> parts.name == name and parts.drip == dId
+        e if parts? and pred()
+      $(_.first(els))
+
+    # Eval post render function in the context
+    # of a specific component
+    evalPostRender = (postFn) ->
+      postFnStr = $(postFn).html()
+      postFnPreStr = '''
+        var d = byDrip;
+      '''
+      postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
+      eval postFnStrPrime
 
     # Create a guid on element having `drip` attribute
     attachGuidFromDripAttr = (s) ->
-      dripId = s.attr 'drip'
-      if dripId?
-        guid = "#{name}_#{dripId}"
+      did = s.attr 'drip'
+      if did?
+        guid = dripId.dripToGuid name, did
         s.attr 'guid', guid
 
     # Transformations on all children of a component
@@ -26,6 +49,14 @@ drip = window.drip = (->
       _.each c.children(), (kid) ->
         kid = $ kid unless kid.attr?
         attachGuidFromDripAttr kid
+
+    # Fetch server-side markup
+    sync = (afterSync) ->
+      now.driprender name, (mk, postFn) ->
+        comp.markup = mk
+        comp.postRender = ->
+          evalPostRender postFn
+        afterSync() if afterSync?
 
     # Render markup on page
     draw = ->
@@ -36,12 +67,22 @@ drip = window.drip = (->
     render = (fn) ->
       sync ->
         draw()
+        ev.addTo 'postRender', comp.postRender
         fn() if fn?
+
+    # Render a component again
+    # immediately replaying post render hook
+    reRender = ->
+      sync ->
+        draw()
+        comp.postRender()
+
     components[name] = sel
 
     sel.sync = sync
     sel.draw = draw
     sel.render = render
+    sel.reRender = reRender
     sel
 
 
@@ -79,7 +120,7 @@ drip = window.drip = (->
       formPairs[nameAttr] = c.val() if nameAttr?
     formPairs
 
-  # Very basic event system
+  # Basic event system
   ev = (->
     evs = []
     groups = {}
@@ -91,18 +132,22 @@ drip = window.drip = (->
     add: (f) -> evs.push(f)
     all: -> execAll evs
     allIn: (g) -> execAll groups[g] if groups[g]?
+    clear: (g) -> delete groups[g]
   )()
 
   # Intial page render call
   # fn executed after all coponents are rendered
   ready: (fn) ->
     now.ready ->
-      renderAll fn
+      renderAll ->
+        # Execute component post-render functions
+        ev.allIn 'postRender'
+        fn() if fn?
+
   # Re-render a component
   refresh: (name) -> components[name].render()
   # Get a drip component by name
   component: (name) -> components[name]
+  components: components
   formPackage: formPackage
-  # Expose entire event system
-  events: ev
 )()
