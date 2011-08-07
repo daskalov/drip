@@ -25,7 +25,9 @@ drip = window.drip = (->
         parts = dripId.guidToDrip guid
         pred = -> parts.name == name and parts.drip == dId
         e if parts? and pred()
-      $(_.first(els))
+      found = $(_.first(els))
+      found.package = -> formPackage( found )
+      found
 
     # Eval post render function in the context
     # of a specific component
@@ -33,19 +35,20 @@ drip = window.drip = (->
       postFnStr = $(postFn).html()
       postFnPreStr = '''
         var d = byDrip;
+        var current = sel;
+        var c = function (n) { return getComponent(n) };
       '''
       postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
       eval postFnStrPrime
 
-    # Create a guid on element having `drip` attribute
-    attachGuidFromDripAttr = (s) ->
-      did = s.attr 'drip'
-      if did?
-        guid = dripId.dripToGuid name, did
-        s.attr 'guid', guid
-
     # Transformations on all children of a component
     postProcessComponent = (c) ->
+      # Create a guid on element having `drip` attribute
+      attachGuidFromDripAttr = (s) ->
+        did = s.attr 'drip'
+        if did?
+          guid = dripId.dripToGuid name, did
+          s.attr 'guid', guid
       _.each c.children(), (kid) ->
         kid = $ kid unless kid.attr?
         attachGuidFromDripAttr kid
@@ -78,11 +81,10 @@ drip = window.drip = (->
         comp.postRender()
 
     components[name] = sel
-
     sel.sync = sync
     sel.draw = draw
     sel.render = render
-    sel.reRender = reRender
+    sel.refresh = reRender
     sel
 
 
@@ -111,8 +113,7 @@ drip = window.drip = (->
 
   # Create an object with form element key-value pairs
   #   name attribute: form value
-  formPackage = ->
-    form = $('#drip_form')
+  formPackage = (form) ->
     formPairs = {}
     _.each form.children(), (c) ->
       c = $(c) unless c.attr?
@@ -135,6 +136,8 @@ drip = window.drip = (->
     clear: (g) -> delete groups[g]
   )()
 
+  getComponent = (name) -> components[name]
+
   # Intial page render call
   # fn executed after all coponents are rendered
   ready: (fn) ->
@@ -143,11 +146,7 @@ drip = window.drip = (->
         # Execute component post-render functions
         ev.allIn 'postRender'
         fn() if fn?
-
-  # Re-render a component
-  refresh: (name) -> components[name].render()
   # Get a drip component by name
-  component: (name) -> components[name]
+  component: getComponent
   components: components
-  formPackage: formPackage
 )()
