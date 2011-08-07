@@ -49,16 +49,15 @@ everyone.now.makeWall = WallModel.makeWall
 # Drip
 drip.component 'walls:add'
   render: ->
-    a drip: 'button', href: '#', 'A'
-    a drip: 'buttonb', href: '#', 'b'
-    dripForm ->
+    dripForm 'wall', ->
       input id: 'wall_name', drip: 'wall-name', name: 'name'
       input id: 'wall_description', drip: 'desc', name: 'description'
-    a id: 'button', href: "#", drip: 'button', ->
-      '+ Add'
+    a href: "#", drip: 'button', -> 'Submit'
+
   postRender: -> run ->
-    d('button').click -> alert "I'm an A!"
-    d('buttonb').click -> alert "I'm an B!"
+    d('button').click ->
+      now.makeWall d('wall').package(), ->
+        c('walls:list').refresh()
 
 drip.component 'walls:list'
   render: ->
