@@ -45,44 +45,36 @@ WallModel.makeWall = (props, cbak) ->
 # Now
 everyone.now.makeWall = WallModel.makeWall
 
-everyone.now.test = (fromClient) ->
-  cid = @user.clientId
-  console.log "Got #{fromClient} from client"
-  console.log "cid: #{cid}"
-  everyone.now.clientTest()
-
-everyone.now.bindStuff = ->
-  @now.wallBind "var ff = function () { return alert('From se!'); }"
-
-# nowjs.on 'connect', -> this.now.clientConnect()
-
 
 # Drip
 drip.component 'walls:add'
   render: ->
+    a drip: 'button', href: '#', 'A'
+    a drip: 'buttonb', href: '#', 'b'
     dripForm ->
       input id: 'wall_name', drip: 'wall-name', name: 'name'
       input id: 'wall_description', drip: 'desc', name: 'description'
     a id: 'button', href: "#", drip: 'button', ->
       '+ Add'
+  postRender: -> run ->
+    d('button').click -> alert "I'm an A!"
+    d('buttonb').click -> alert "I'm an B!"
 
 drip.component 'walls:list'
   render: ->
     h4 "#{ @walls.length }"
-    a id: 'test_button', 'Test'
+    a id: 'test_button', href: '#', drip: 'button', 'Test'
     ul ->
       @walls.forEach (w) ->
         li w.name
         li w.description
         br ''
-
-    postRender -> drip.events.add ->
-      alert 'a'
-      alert 'b'
-
+  postRender: -> run ->
+    d('button').click -> alert 'clickity clack'
   scope: (s) ->
     WallModel.all (docs) ->
       s walls: docs
+
 
 # Router
 app.get '/', (req, res) ->
