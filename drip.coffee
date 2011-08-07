@@ -12,9 +12,12 @@ components = {}
 coreHelpers =
   # Ad-hoc form useful in packaging groups of
   # user-submitted values
-  dripForm: (inner) ->
-    div dripform: 'true', id: 'drip_form', ->
-      inner()
+  dripForm: (dId, inner) ->
+    attrs = {}
+    attrs.drip = dId
+    attrs.dripform = 'true'
+    attrs.id = 'drip_form'
+    div attrs, inner
 
 # Main render function
 # Renders a drip component's template with
@@ -31,7 +34,7 @@ compilePostRender = (comp) ->
   postHelpers =
     hardcode:
       run: (f) -> coffeescript f
-  compiledPostRender = ckup comp.postRender, postHelpers
+  ckup comp.postRender, postHelpers
 
 # CoffeeKup render a template with extra scope
 renderTemplate = (tmpl, xtra) ->
