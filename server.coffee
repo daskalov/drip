@@ -47,6 +47,22 @@ everyone.now.makeWall = WallModel.makeWall
 
 
 # Drip
+drip.ui
+  toolbar: (props, mk) ->
+    props.class = 'tbar'
+    div props, mk
+  button: (props, mk) ->
+    props.class = 'button'
+    a props, mk
+
+drip.component 'walls:uitest'
+  render: ->
+    toolbar drip: 'yee', ->
+      h3 'in da bar'
+      button drip: 'b1', 'Button 1'
+      button drip: 'b2', ->
+        'button 2 had a frown'
+
 drip.component 'walls:add'
   render: ->
     dripForm 'wall', ->
