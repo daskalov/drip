@@ -6,6 +6,8 @@ ckup = coffeekup.render
 helpers = {}
 # Holds all renderable components
 components = {}
+# Holds all UI helper functions
+uiHelpers = {}
 
 # Helpers available to templates provided
 # by any drip component
@@ -29,14 +31,21 @@ compilePostRender = (comp) ->
 
 # CoffeeKup render a template with extra scope
 renderTemplate = (tmpl, xtra) ->
-  hard = { hardcode: _.extend(helpers, coreHelpers) }
+  hard =
+    hardcode: _.extend helpers,
+                       coreHelpers,
+                       uiHelpers
   ckup tmpl, _.extend(xtra, hard)
 
 
 drip = exports
 
+# Add to UI elements available to drip components
+drip.ui = (els) ->
+  uiHelpers = _.extend uiHelpers, els
+
 # Main render function
-# Renders a drip component's template with
+# Render a drip component's template with
 # the scope specified by the component in scope
 drip.nowRender = (name, clientHandler) ->
   comp = components[name]
@@ -45,6 +54,9 @@ drip.nowRender = (name, clientHandler) ->
     clientHandler markup, compilePostRender(comp)
 
 # Drip helpers for templates
+# Used to supply a template with the local `component`
+# which accepts as an argument the name of a declared
+# component to render in-place
 drip.clientHelpers =
   hardcode:
     component: (name, props) ->
@@ -53,7 +65,9 @@ drip.clientHelpers =
       props.component = name
       div props
 
-# Adds a component to the components object
+# Define a component object
+# After declaration, the component is available
+# to be rendered by name
 drip.component = (compName, props) ->
   props.name = compName
   props.scope ?= (s) -> s {}
@@ -61,6 +75,6 @@ drip.component = (compName, props) ->
   components[compName] = props
   props
 
-# Sets the now function called by the client
+# Set the now function called by the client
 drip.setNow = (errbody) ->
   errbody.now.driprender = drip.nowRender
