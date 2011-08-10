@@ -24,8 +24,8 @@ coreHelpers =
 compilePostRender = (comp) ->
   postHelpers =
     hardcode:
-      client: (f) -> coffeescript f
-  ckup comp.postRender, postHelpers
+      ready: (f) -> coffeescript f
+  ckup comp.client, postHelpers
 
 # CoffeeKup render a template with extra scope
 renderTemplate = (tmpl, xtra) ->
@@ -57,7 +57,7 @@ drip.clientHelpers =
 drip.component = (compName, props) ->
   props.name = compName
   props.scope ?= (s) -> s {}
-  props.postRender ?= ->
+  props.client ?= ->
   components[compName] = props
   props
 

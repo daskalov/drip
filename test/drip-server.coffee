@@ -29,7 +29,7 @@ vows.describe('Drip Server').addBatch(
         h2 @b
       scope: (s) ->
         s { a: 1, b: '2' }
-      postRender: -> client ->
+      client: -> ready ->
         alert 'Hey'
 
     'gives it a name': (component) ->
@@ -59,6 +59,6 @@ vows.describe('Drip Server').addBatch(
       component.scope (s) -> s.should.eql {}
 
     'Gives it a default post render function': (component) ->
-      component.should.have.property 'postRender'
+      component.should.have.property 'client'
 
 ).export(module)
