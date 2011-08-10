@@ -20,6 +20,8 @@ vows.describe('Drip Server').addBatch(
     'setNow': ->
       should.exist drip.setNow
       should.exist everyone.now.driprender
+    'ui': ->
+      should.exist drip.ui
 
   'Creating a component':
     topic: drip.component 'test:component'
