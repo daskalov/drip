@@ -54,7 +54,7 @@ drip.component 'walls:add'
       input id: 'wall_description', drip: 'desc', name: 'description'
     a href: "#", drip: 'button', -> 'Submit'
 
-  postRender: -> run ->
+  postRender: -> client ->
     d('button').click ->
       now.makeWall d('wall').package(), ->
         c('walls:list').refresh()
@@ -68,7 +68,7 @@ drip.component 'walls:list'
         li w.name
         li w.description
         br ''
-  postRender: -> run ->
+  postRender: -> client ->
     d('button').click -> alert 'clickity clack'
   scope: (s) ->
     WallModel.all (docs) ->
