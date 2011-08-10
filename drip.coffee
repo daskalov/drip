@@ -19,21 +19,12 @@ coreHelpers =
     attrs.id = 'drip_form'
     div attrs, inner
 
-# Main render function
-# Renders a drip component's template with
-# the scope specified by the component in scope
-nowRender = (name, clientHandler) ->
-  comp = components[name]
-  comp.scope (sc) ->
-    markup = renderTemplate(comp.render, sc)
-    clientHandler markup, compilePostRender(comp)
-
 # Compile post-render function
 # Sent as a string to the client to be eval'd in context
 compilePostRender = (comp) ->
   postHelpers =
     hardcode:
-      run: (f) -> coffeescript f
+      client: (f) -> coffeescript f
   ckup comp.postRender, postHelpers
 
 # CoffeeKup render a template with extra scope
@@ -43,6 +34,15 @@ renderTemplate = (tmpl, xtra) ->
 
 
 drip = exports
+
+# Main render function
+# Renders a drip component's template with
+# the scope specified by the component in scope
+drip.nowRender = (name, clientHandler) ->
+  comp = components[name]
+  comp.scope (sc) ->
+    markup = renderTemplate(comp.render, sc)
+    clientHandler markup, compilePostRender(comp)
 
 # Drip helpers for templates
 drip.clientHelpers =
@@ -55,10 +55,12 @@ drip.clientHelpers =
 
 # Adds a component to the components object
 drip.component = (compName, props) ->
+  props.name = compName
   props.scope ?= (s) -> s {}
   props.postRender ?= ->
   components[compName] = props
+  props
 
 # Sets the now function called by the client
 drip.setNow = (errbody) ->
-  errbody.now.driprender = nowRender
+  errbody.now.driprender = drip.nowRender
