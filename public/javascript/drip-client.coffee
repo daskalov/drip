@@ -106,10 +106,10 @@ drip = window.drip = (->
     unless renderedOnce
       renderedOnce = true
       comps = allPageComponents()
-      _.last(comps).isLast = true
+      barrier = comps.length
       _.each comps, (sel) ->
         renderComponent sel, ->
-          fn() if fn? and sel.isLast
+          fn() if fn? and --barrier == 0
 
   # true if a jQuery selector represents a drip object
   isDrip = (sel) -> sel.attr('drip') == 'true'
