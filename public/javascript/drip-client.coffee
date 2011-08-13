@@ -49,9 +49,12 @@ drip = window.drip = (->
         if did?
           guid = dripId.dripToGuid name, did
           s.attr 'guid', guid
-      _.each c.children(), (kid) ->
-        kid = $ kid unless kid.attr?
-        attachGuidFromDripAttr kid
+      descend = (els) -> unless _.isEmpty els
+        _.each els, (kid) ->
+          kid = $ kid unless kid.attr?
+          attachGuidFromDripAttr kid
+          descend kid.children()
+      descend c.children()
 
     # Fetch server-side markup
     sync = (afterSync) ->
