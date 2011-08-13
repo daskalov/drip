@@ -31,11 +31,10 @@ compilePostRender = (comp) ->
 
 # CoffeeKup render a template with extra scope
 renderTemplate = (tmpl, xtra) ->
-  hard =
-    hardcode: _.extend helpers,
-                       coreHelpers,
-                       uiHelpers
-  ckup tmpl, _.extend(xtra, hard)
+  hard = _.extend helpers,
+                  coreHelpers,
+                  uiHelpers
+  ckup tmpl, _.extend(xtra, { hardcode: hard })
 
 
 drip = exports
