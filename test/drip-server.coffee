@@ -1,5 +1,5 @@
 vows = require 'vows'
-should = require '/Users/alexd/dev/javascript/should.js'
+should = require 'should'
 drip = require '../drip'
 nowjs = require 'now'
 express = require 'express'
