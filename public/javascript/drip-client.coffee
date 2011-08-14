@@ -78,10 +78,12 @@ drip = window.drip = (->
 
     # Render a component again
     # immediately replaying post render hook
-    reRender = ->
+    reRender = (args) ->
       sync ->
+        args.before() if args.before?
         draw()
         comp.postRender()
+        args.after() if args.after?
 
     components[name] = sel
     sel.sync = sync
@@ -141,6 +143,11 @@ drip = window.drip = (->
 
   getComponent = (name) -> components[name]
 
+  # Create an empty component container
+  # NOTE: Structure duplicated server-side in drip.clientHelpers
+  componentTemplate = (compName) ->
+    "<div id=\"fff\" component=\"#{compName}\" drip=\"true\"></div>"
+
   # Intial page render call
   # fn executed after all coponents are rendered
   ready: (fn) ->
@@ -152,4 +159,10 @@ drip = window.drip = (->
   # Get a drip component by name
   component: getComponent
   components: components
+  inject: (compName, props) ->
+    into = props.into
+    compContainer = componentTemplate compName
+    comp = component $(compContainer)
+    into.html comp
+    comp.refresh props
 )()
