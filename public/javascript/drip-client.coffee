@@ -2,6 +2,8 @@ drip = window.drip = (->
   components = {}
   renderedOnce = false
 
+  # Mappings between drip ids relative to a
+  # component and guids held on element attributes
   dripId =
     GUID_SEPERATOR: '___'
     dripToGuid: (cname, dripId) ->
@@ -29,11 +31,13 @@ drip = window.drip = (->
       found.package = -> formPackage( found )
       found
 
+    # All subscribed events for this component
     subEvents = {}
+    # Function for post-render event subscription
     subscribeToEvent = (name, respondFn) ->
       subEvents[name] = respondFn
-    fireEvent = (name) ->
-      subEvents[name]()
+    # Invoke component event by name
+    fireEvent = (name) -> subEvents[name]()
 
     # Eval post render function in the context
     # of a specific component
@@ -63,7 +67,7 @@ drip = window.drip = (->
           descend kid.children()
       descend c.children()
 
-    # Fetch server-side markup
+    # Fetch server-side data
     sync = (afterSync) ->
       now.driprender name, (mk, postFn) ->
         comp.markup = mk
@@ -98,7 +102,7 @@ drip = window.drip = (->
     sel.draw = draw
     sel.render = render
     sel.refresh = reRender
-    sel.fire = fireEvent
+    sel.send = fireEvent
     sel
 
 
@@ -153,9 +157,11 @@ drip = window.drip = (->
   getComponent = (name) -> components[name]
 
   # Create an empty component container
-  # NOTE: Structure duplicated server-side in drip.clientHelpers
-  componentTemplate = (compName) ->
-    "<div id=\"fff\" component=\"#{compName}\" drip=\"true\"></div>"
+  # NOTE: Client dupliacte of helper in `drip.clientHelpers`
+  componentTemplate = (compName) -> """
+    <div component="#{compName}" drip="true">
+    </div>
+  """
 
   # Intial page render call
   # fn executed after all coponents are rendered
