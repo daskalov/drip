@@ -62,6 +62,9 @@ drip.clientHelpers =
       props ?= {}
       props.drip = 'true'
       props.component = name
+      # Structure of this tag is duplicated client-side
+      # to allow for component injection without a round-trip
+      # to reuse server-side definition
       div props
 
 # Define a component object

@@ -29,6 +29,12 @@ drip = window.drip = (->
       found.package = -> formPackage( found )
       found
 
+    subEvents = {}
+    subscribeToEvent = (name, respondFn) ->
+      subEvents[name] = respondFn
+    fireEvent = (name) ->
+      subEvents[name]()
+
     # Eval post render function in the context
     # of a specific component
     evalPostRender = (postFn) ->
@@ -37,6 +43,7 @@ drip = window.drip = (->
         var d = byDrip;
         var current = sel;
         var c = function (n) { return getComponent(n) };
+        var subscribe = subscribeToEvent;
       '''
       postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
       eval postFnStrPrime
@@ -86,10 +93,12 @@ drip = window.drip = (->
         args.after() if args.after?
 
     components[name] = sel
+
     sel.sync = sync
     sel.draw = draw
     sel.render = render
     sel.refresh = reRender
+    sel.fire = fireEvent
     sel
 
 
