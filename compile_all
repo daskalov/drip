@@ -1,4 +1,2 @@
-coffee -c server.coffee
 coffee -c drip.coffee
 coffee -c public/javascript/drip-client.coffee
-coffee -c public/javascript/client.coffee
