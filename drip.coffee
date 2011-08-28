@@ -111,7 +111,8 @@ drip.init = (props) ->
         extraScopes =
           socket:  that.socket
           session: session
-          user:    that.user
+          nowuser: that.user
+        extraScopes.user = session.user if session?
         drip.nowRender(name, extraScopes, clientHandler)
       else
         throw "Couldn't retrieve the session"
