@@ -14,7 +14,7 @@ uiHelpers = {}
 coreHelpers =
   # Ad-hoc form useful in packaging groups of
   # user-submitted values
-  dripForm: (dId, inner) ->
+  dripform: (dId, inner) ->
     attrs = {}
     attrs.drip = dId
     attrs.dripform = 'true'
@@ -46,10 +46,12 @@ drip.ui = (els) ->
 # Main render function
 # Render a drip component's template with
 # the scope specified by the component in scope
-drip.nowRender = (name, clientHandler) ->
+
+drip.nowRender = (name, injectedScopes, clientHandler) ->
   comp = components[name]
   comp.scope (sc) ->
-    markup = renderTemplate(comp.render, sc)
+    fullScope = _.extend sc, injectedScopes
+    markup = renderTemplate(comp.render, fullScope)
     clientHandler markup, compilePostRender(comp)
 
 # Drip helpers for templates
@@ -77,6 +79,69 @@ drip.component = (compName, props) ->
   components[compName] = props
   props
 
-# Set the now function called by the client
-drip.setNow = (errbody) ->
-  errbody.now.driprender = drip.nowRender
+
+# Drip initialization
+# drip.init
+#   now:
+#     everyone: everyone
+#     now: now
+#   session:
+#     key: key
+#     store: store
+drip.init = (props) ->
+  everyone = props.now.everyone
+  nowjs = props.now.now
+  sessionKey = props.session.key
+  sessionStore = props.session.store
+  # Set sessionID during handshake to expose it for render call
+  nowjs.server.set 'authorization', (data, accept) ->
+    cookie = data.headers.cookie
+    if cookie?
+      data.cookie = utils.cookieParser cookie
+      data.sessionId = data.cookie[sessionKey]
+      accept null, true
+    else accept 'Missing cookie. Authorization failed.', false
+  # Setup the server-side now function clients will call to fetch components
+  everyone.now.driprender = (name, clientHandler) ->
+    # Grab the client's session exposing it to the component render scope
+    sessionId = @socket.handshake.sessionId
+    that = this
+    sessionStore.get sessionId, (err, session) ->
+      unless err?
+        extraScopes =
+          socket:  that.socket
+          session: session
+          user:    that.user
+        drip.nowRender(name, extraScopes, clientHandler)
+      else
+        throw "Couldn't retrieve the session"
+
+utils =
+  # Parse a cookie string into an object with key-value pairs
+  # representing the key-value pairs in the cookie
+  cookieParser: (str) ->
+    surroundedBy = (checkStr, surr) ->
+      firstChar = checkStr[0]
+      lastChar = checkStr[checkStr.length]
+      firstChar == lastChar == surr
+    cutEdges = (s) -> s.slice 1, -1
+    plusToSpace = (s) -> s.replace /\+/g, '"'
+    cutQuotes = (s) ->
+      isQuoted = (s) -> surroundedBy s, '"'
+      s = cutEdges s if isQuoted s
+      s
+    splitKeyVal = (s) ->
+      p = s.split /\=/
+      key: p[0]
+      val: p[1]
+
+    ret = {}
+    str.split(/[;,] */).forEach (strPair) ->
+      pair = splitKeyVal strPair
+      unless ret[pair.key]?
+        pair.val = plusToSpace cutQuotes pair.val
+        try ret[pair.key] = decodeURIComponent pair.val
+        catch err
+          if err instanceof URIError ret[pair.key] = pair.val
+          else                       throw err
+    ret
