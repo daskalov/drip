@@ -71,6 +71,8 @@ drip = window.drip = (->
     sync = (afterSync) ->
       now.driprender name, (mk, postFn) ->
         comp.markup = mk
+        # When called, `comp.postRender` will execute the code
+        # supplied by the component's `client: -> ready ->` callback
         comp.postRender = ->
           evalPostRender postFn
         afterSync() if afterSync?
@@ -81,15 +83,19 @@ drip = window.drip = (->
       postProcessComponent sel
 
     # Render the component
+    # Called in initial page load
+    # Subsequent rendering should use component.refresh
     render = (fn) ->
       sync ->
         draw()
+        # Accrue post-render hooks to call at once when
+        # every component has rendered
         ev.addTo 'postRender', comp.postRender
         fn() if fn?
 
     # Render a component again
-    # immediately replaying post render hook
-    reRender = (args) ->
+    # Immediately replay post-render hook
+    reRender = (args = {}) ->
       sync ->
         args.before() if args.before?
         draw()
