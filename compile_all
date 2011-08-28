@@ -1,2 +1,2 @@
 coffee -c drip.coffee
-coffee -c public/javascript/drip-client.coffee
+coffee -c drip-client.coffee
