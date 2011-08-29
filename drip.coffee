@@ -33,7 +33,8 @@ compilePostRender = (comp) ->
 renderTemplate = (tmpl, xtra) ->
   hard = _.extend helpers,
                   coreHelpers,
-                  uiHelpers
+                  uiHelpers,
+                  drip.clientHelpers.hardcode
   ckup tmpl, _.extend(xtra, { hardcode: hard })
 
 
