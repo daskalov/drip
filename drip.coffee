@@ -132,9 +132,9 @@ utils =
       s = cutEdges s if isQuoted s
       s
     splitKeyVal = (s) ->
-      p = s.split /\=/
-      key: p[0]
-      val: p[1]
+      [k, v] = s.split /\=/
+      key: k
+      val: v
 
     ret = {}
     str.split(/[;,] */).forEach (strPair) ->

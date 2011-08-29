@@ -10,9 +10,9 @@ drip = window.drip = (->
       "#{cname}#{@GUID_SEPERATOR}#{dripId}"
     guidToDrip: (gu) ->
       return undefined unless gu?
-      parts = gu.split @GUID_SEPERATOR
-      name: parts[0]
-      drip: parts[1]
+      [nm, dId] = gu.split @GUID_SEPERATOR
+      name: nm
+      drip: dId
 
   # Augment jQuery selector with drip properties
   # Represents a single drip component
