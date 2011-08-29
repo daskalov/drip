@@ -25,10 +25,9 @@ drip = window.drip = (->
       els = _.filter $('*'), (e) ->
         guid = $(e).attr('guid')
         parts = dripId.guidToDrip guid
-        pred = -> parts.name == name and parts.drip == dId
-        e if parts? and pred()
+        e if parts? and parts.name is name and parts.drip is dId
       found = $(_.first(els))
-      found.package = -> formPackage( found )
+      found.package = -> formPackage found
       found
 
     # All subscribed events for this component

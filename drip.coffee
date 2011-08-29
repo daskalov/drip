@@ -101,9 +101,11 @@ drip.init = (props) ->
       data.sessionId = data.cookie[sessionKey]
       accept null, true
     else accept 'Missing cookie. Authorization failed.', false
-  # Setup the server-side now function clients will call to fetch components
+  # Setup the server-side now function
+  # clients will call to fetch components
   everyone.now.driprender = (name, clientHandler) ->
-    # Grab the client's session exposing it to the component render scope
+    # Grab the client's session exposing it to
+    # the component render scope
     sessionId = @socket.handshake.sessionId
     that = this
     sessionStore.get sessionId, (err, session) ->
