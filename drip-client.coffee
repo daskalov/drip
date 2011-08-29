@@ -14,6 +14,15 @@ drip = window.drip = (->
       name: nm
       drip: dId
 
+  # Apply fn recursively to every child of sel
+  applyToAllChildren = (sel, fn) ->
+    descend = (els) -> unless _.isEmpty els
+      _.each els, (kid) ->
+        kid = $ kid unless kid.attr?
+        fn kid
+        descend kid.children()
+    descend sel.children()
+
   # Augment jQuery selector with drip properties
   # Represents a single drip component
   component = (sel) ->
@@ -59,12 +68,7 @@ drip = window.drip = (->
         if did?
           guid = dripId.dripToGuid name, did
           s.attr 'guid', guid
-      descend = (els) -> unless _.isEmpty els
-        _.each els, (kid) ->
-          kid = $ kid unless kid.attr?
-          attachGuidFromDripAttr kid
-          descend kid.children()
-      descend c.children()
+      applyToAllChildren c, attachGuidFromDripAttr
 
     # Fetch server-side data
     sync = (afterSync) ->
