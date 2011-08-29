@@ -26,7 +26,7 @@ drip = window.drip = (->
         guid = $(e).attr('guid')
         parts = dripId.guidToDrip guid
         e if parts? and parts.name is name and parts.drip is dId
-      found = $(_.first(els))
+      found = $ _.first els
       found.package = -> formPackage found
       found
 
@@ -70,8 +70,8 @@ drip = window.drip = (->
     sync = (afterSync) ->
       now.driprender name, (mk, postFn) ->
         comp.markup = mk
-        # When called, `comp.postRender` will execute the code
-        # supplied by the component's `client: -> ready ->` callback
+        # When called, `comp.postRender` will execute the code supplied
+        # by the component's `client: -> ready ->` definition
         comp.postRender = ->
           evalPostRender postFn
         afterSync() if afterSync?
