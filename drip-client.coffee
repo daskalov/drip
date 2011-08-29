@@ -74,9 +74,10 @@ drip = window.drip = (->
     sync = (afterSync) ->
       now.driprender name, (mk, postFn) ->
         comp.markup = mk
-        # When called, `comp.postRender` will execute the code supplied
-        # by the component's `client: -> ready ->` definition
         comp.postRender = ->
+          # Render any nested components
+          renderAllIn sel
+          # Execute component's ready function
           evalPostRender postFn
         afterSync() if afterSync?
 
@@ -120,20 +121,34 @@ drip = window.drip = (->
     comp = component sel
     comp.render fn
 
-  # Retrieve all drip components in the DOM
-  allPageComponents = ->
-    els = _.map $('*'), (e) -> $(e)
-    _.filter els, (e) -> isDrip e
+  # Returns a flat array of every child of sel
+  flattenChildren = (sel) ->
+    all = []
+    descend = (els) -> unless _.isEmpty els
+      _.each els, (kid) ->
+        kid = $(kid)
+        all.push kid
+        descend kid.children()
+    descend sel.children()
+    all
+
+  # Retrieve all drip components that are children of sel
+  componentsIn = (sel) ->
+    _.filter flattenChildren(sel), isDrip
+
+  # Render any components that are children of sel
+  renderAllIn = (sel, fn) ->
+    comps = componentsIn sel
+    barrier = comps.length
+    _.each comps, (sel) ->
+      renderComponent sel, ->
+        fn() if fn? and --barrier == 0
 
   # Render all drip components on the page
   renderAll = (fn) ->
     unless renderedOnce
       renderedOnce = true
-      comps = allPageComponents()
-      barrier = comps.length
-      _.each comps, (sel) ->
-        renderComponent sel, ->
-          fn() if fn? and --barrier == 0
+      renderAllIn $('body'), fn
 
   # true if a jQuery selector represents a drip object
   isDrip = (sel) -> sel.attr('drip') == 'true'
