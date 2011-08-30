@@ -124,12 +124,7 @@ drip = window.drip = (->
   # Returns a flat array of every child of sel
   flattenChildren = (sel) ->
     all = []
-    descend = (els) -> unless _.isEmpty els
-      _.each els, (kid) ->
-        kid = $(kid)
-        all.push kid
-        descend kid.children()
-    descend sel.children()
+    applyToAllChildren sel, (child) -> all.push child
     all
 
   # Retrieve all drip components that are children of sel
