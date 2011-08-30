@@ -153,15 +153,11 @@ drip = window.drip = (->
 
   # Basic event system
   ev = (->
-    evs = []
     groups = {}
     execAll = (a) -> _.each a, (f) -> f()
     addTo: (g, f) ->
       group = groups[g] ||= []
       group.push(f)
-      evs.push(f)
-    add: (f) -> evs.push(f)
-    all: -> execAll evs
     allIn: (g) -> execAll groups[g] if groups[g]?
     clear: (g) -> delete groups[g]
   )()
