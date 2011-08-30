@@ -1,6 +1,5 @@
 drip = window.drip = (->
   components = {}
-  renderedOnce = false
 
   # Mappings between drip ids relative to a
   # component and guids held on element attributes
@@ -139,12 +138,6 @@ drip = window.drip = (->
       renderComponent sel, ->
         fn() if fn? and --barrier == 0
 
-  # Render all drip components on the page
-  renderAll = (fn) ->
-    unless renderedOnce
-      renderedOnce = true
-      renderAllIn $('body'), fn
-
   # true if a jQuery selector represents a drip object
   isDrip = (sel) -> sel.attr('drip') == 'true'
 
@@ -186,7 +179,7 @@ drip = window.drip = (->
   # fn executed after all coponents are rendered
   ready: (fn) ->
     now.ready ->
-      renderAll ->
+      renderAllIn $('body'), ->
         # Execute component post-render functions
         ev.allIn 'postRender'
         fn() if fn?
