@@ -93,16 +93,18 @@ drip.ui = (els) ->
 drip.nowRender = (name, path, injectedScopes, clientHandler) ->
   comp = components[name]
   scopeObj =
+    # Capture variables from URL
+    capture: (matchPath, paramsHandler) ->
+      params = sherpa.parameterize matchPath, path
+      if params?
+        paramsHandler null, params
+      else
+        paramsHandler "no-match"
+    # Expose variables to view
     expose: (exposed...) ->
       fullScope = _.extend injectedScopes, exposed...
       markup = renderTemplate comp.render, fullScope
       clientHandler markup, compilePostRender(comp)
-    route: (matchPath, cbak) ->
-      params = sherpa.parameterize matchPath, path
-      if params?
-        cbak null, params
-      else
-        cbak "no-match"
   comp.scope scopeObj
 
 # Drip helpers for templates
