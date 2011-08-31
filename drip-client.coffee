@@ -71,7 +71,8 @@ drip = window.drip = (->
 
     # Fetch server-side data
     sync = (afterSync) ->
-      now.driprender name, (mk, postFn) ->
+      hash = window.location.hash
+      now.driprender name, hash, (mk, postFn) ->
         comp.markup = mk
         comp.postRender = ->
           # Render any nested components
@@ -169,7 +170,7 @@ drip = window.drip = (->
   # fn executed after all coponents are rendered
   ready: (fn) ->
     now.ready ->
-      renderAllIn $('body'), -> fn() if fn?
+      renderAllIn $('body'), fn
   # Get a drip component by name
   component: getComponent
   components: components
