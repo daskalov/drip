@@ -1,5 +1,7 @@
 coffeekup = require 'coffeekup'
 _ = require 'underscore'
+Sherpa = require('./sherpa/sherpa/nodejs').Sherpa
+sherpaRouter = new Sherpa.Router
 
 
 ckup = coffeekup.render
@@ -37,6 +39,47 @@ renderTemplate = (tmpl, xtra) ->
                   drip.clientHelpers.hardcode
   ckup tmpl, _.extend(xtra, { hardcode: hard })
 
+# Sherpa wrapper
+sherpa = (->
+  paths = {}
+  add = (path) -> unless paths[path]
+    paths[path] = sherpaRouter.add('#!' + path).to('')
+  parameterize: (matchPath, path) ->
+    add matchPath
+    rec = sherpaRouter.recognize path
+    if rec? then rec.params else null
+)()
+
+# Parse a cookie string into an object with key-value pairs
+# representing the key-value pairs in the cookie
+# Follows `connect.utils.parseCookie`
+cookieParser = (str) ->
+  surroundedBy = (checkStr, surr) ->
+    firstChar = checkStr[0]
+    lastChar = checkStr[checkStr.length]
+    firstChar == lastChar == surr
+  cutEdges = (s) -> s.slice 1, -1
+  plusToSpace = (s) -> s.replace /\+/g, '"'
+  cutQuotes = (s) ->
+    isQuoted = (s) -> surroundedBy s, '"'
+    s = cutEdges s if isQuoted s
+    s
+  splitKeyVal = (s) ->
+    [k, v] = s.split /\=/
+    key: k
+    val: v
+
+  ret = {}
+  str.split(/[;,] */).forEach (strPair) ->
+    pair = splitKeyVal strPair
+    unless ret[pair.key]?
+      pair.val = plusToSpace cutQuotes pair.val
+      try ret[pair.key] = decodeURIComponent pair.val
+      catch err
+        if err instanceof URIError ret[pair.key] = pair.val
+        else                       throw err
+  ret
+
 
 drip = exports
 
@@ -47,13 +90,20 @@ drip.ui = (els) ->
 # Main render function
 # Render a drip component's template with
 # the scope specified by the component in scope
-
-drip.nowRender = (name, injectedScopes, clientHandler) ->
+drip.nowRender = (name, path, injectedScopes, clientHandler) ->
   comp = components[name]
-  comp.scope (sc) ->
-    fullScope = _.extend sc, injectedScopes
-    markup = renderTemplate(comp.render, fullScope)
-    clientHandler markup, compilePostRender(comp)
+  scopeObj =
+    expose: (exposed...) ->
+      fullScope = _.extend injectedScopes, exposed...
+      markup = renderTemplate comp.render, fullScope
+      clientHandler markup, compilePostRender(comp)
+    route: (matchPath, cbak) ->
+      params = sherpa.parameterize matchPath, path
+      if params?
+        cbak null, params
+      else
+        cbak "no-match"
+  comp.scope scopeObj
 
 # Drip helpers for templates
 # Used to supply a template with the local `component`
@@ -75,11 +125,10 @@ drip.clientHelpers =
 # to be rendered by name
 drip.component = (compName, props) ->
   props.name = compName
-  props.scope ?= (s) -> s {}
+  props.scope ?= (s) -> s.expose {}
   props.client ?= ->
   components[compName] = props
   props
-
 
 # Drip initialization
 # drip.init
@@ -98,7 +147,7 @@ drip.init = (props) ->
   nowjs.server.set 'authorization', (data, accept) ->
     cookie = data.headers.cookie
     if cookie?
-      data.cookie = utils.cookieParser cookie
+      data.cookie = cookieParser cookie
       data.sessionId = data.cookie[sessionKey]
       accept null, true
     else accept 'Missing cookie. Authorization failed.', false
@@ -116,36 +165,6 @@ drip.init = (props) ->
           session: session
           nowuser: that.user
         extraScopes.user = session.user if session?
-        drip.nowRender(name, extraScopes, clientHandler)
+        drip.nowRender(name, path, extraScopes, clientHandler)
       else
         throw "Couldn't retrieve the session"
-
-utils =
-  # Parse a cookie string into an object with key-value pairs
-  # representing the key-value pairs in the cookie
-  cookieParser: (str) ->
-    surroundedBy = (checkStr, surr) ->
-      firstChar = checkStr[0]
-      lastChar = checkStr[checkStr.length]
-      firstChar == lastChar == surr
-    cutEdges = (s) -> s.slice 1, -1
-    plusToSpace = (s) -> s.replace /\+/g, '"'
-    cutQuotes = (s) ->
-      isQuoted = (s) -> surroundedBy s, '"'
-      s = cutEdges s if isQuoted s
-      s
-    splitKeyVal = (s) ->
-      [k, v] = s.split /\=/
-      key: k
-      val: v
-
-    ret = {}
-    str.split(/[;,] */).forEach (strPair) ->
-      pair = splitKeyVal strPair
-      unless ret[pair.key]?
-        pair.val = plusToSpace cutQuotes pair.val
-        try ret[pair.key] = decodeURIComponent pair.val
-        catch err
-          if err instanceof URIError ret[pair.key] = pair.val
-          else                       throw err
-    ret
