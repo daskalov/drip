@@ -78,12 +78,14 @@ drip = window.drip = (->
           renderAllIn sel
           # Execute component's ready function
           evalPostRender postFn
+        ev.on "ready-#{name}", comp.postRender
         afterSync() if afterSync?
 
     # Render markup on page
     draw = ->
       sel.html comp.markup
       postProcessComponent sel
+      ev.emit "ready-#{name}"
 
     # Render the component
     # Called in initial page load
@@ -91,9 +93,6 @@ drip = window.drip = (->
     render = (fn) ->
       sync ->
         draw()
-        # Accrue post-render hooks to call at once when
-        # every component has rendered
-        ev.addTo 'postRender', comp.postRender
         fn() if fn?
 
     # Render a component again
@@ -102,7 +101,6 @@ drip = window.drip = (->
       sync ->
         args.before() if args.before?
         draw()
-        comp.postRender()
         args.after() if args.after?
 
     components[name] = sel
@@ -153,13 +151,9 @@ drip = window.drip = (->
 
   # Basic event system
   ev = (->
-    groups = {}
-    execAll = (a) -> _.each a, (f) -> f()
-    addTo: (g, f) ->
-      group = groups[g] ||= []
-      group.push(f)
-    allIn: (g) -> execAll groups[g] if groups[g]?
-    clear: (g) -> delete groups[g]
+    events = {}
+    on: (name, fn) -> events[name] = fn
+    emit: (name) -> events[name]() if events[name]?
   )()
 
   getComponent = (name) -> components[name]
@@ -175,10 +169,7 @@ drip = window.drip = (->
   # fn executed after all coponents are rendered
   ready: (fn) ->
     now.ready ->
-      renderAllIn $('body'), ->
-        # Execute component post-render functions
-        ev.allIn 'postRender'
-        fn() if fn?
+      renderAllIn $('body'), -> fn() if fn?
   # Get a drip component by name
   component: getComponent
   components: components
