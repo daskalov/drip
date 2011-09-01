@@ -38,13 +38,10 @@ drip = window.drip = (->
       found.package = -> formPackage found
       found
 
-    # All subscribed events for this component
-    subEvents = {}
-    # Function for post-render event subscription
-    subscribeToEvent = (name, respondFn) ->
-      subEvents[name] = respondFn
-    # Invoke component event by name
-    fireEvent = (name) -> subEvents[name]()
+    # receive / send
+    receiveEvents = eventSystem()
+    # subscribe / publish
+    subscribeEvents = eventSystem()
 
     # Eval post render function in the context
     # of a specific component
@@ -53,8 +50,9 @@ drip = window.drip = (->
       postFnPreStr = '''
         var d = byDrip;
         var current = sel;
-        var c = function (n) { return getComponent(n) };
-        var subscribe = subscribeToEvent;
+        var c = getComponent
+        var receive = receiveEvents.add;
+        var subscribe = subscribeEvents.add;
       '''
       postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
       eval postFnStrPrime
@@ -79,7 +77,7 @@ drip = window.drip = (->
           renderAllIn sel
           # Execute component's ready function
           evalPostRender postFn
-        ev.on "ready-#{name}", comp.postRender
+        ev.set "ready-#{name}", comp.postRender
         afterSync() if afterSync?
 
     # Render markup on page
@@ -97,7 +95,6 @@ drip = window.drip = (->
         fn() if fn?
 
     # Render a component again
-    # Immediately replay post-render hook
     reRender = (args = {}) ->
       sync ->
         args.before() if args.before?
@@ -110,7 +107,8 @@ drip = window.drip = (->
     sel.draw = draw
     sel.render = render
     sel.refresh = reRender
-    sel.send = fireEvent
+    sel.send = receiveEvents.emitGroup
+    sel.publish = subscribeEvents.emitGroup
     sel
 
 
@@ -151,12 +149,17 @@ drip = window.drip = (->
     formPairs
 
   # Basic event system
-  ev = (->
+  eventSystem = ->
     events = {}
-    on: (name, fn) -> events[name] = fn
+    set: (name, fn) -> events[name] = fn
     emit: (name) -> events[name]() if events[name]?
-  )()
+    emitGroup: (name) -> if events[name]?
+      _.each events[name], (f) -> f()
+    add: (name, fn) -> (events[name] ||= []).push fn
+  # Object for all inter-component events
+  ev = eventSystem()
 
+  # Retrieve a component by name
   getComponent = (name) -> components[name]
 
   # Create an empty component container
@@ -174,6 +177,8 @@ drip = window.drip = (->
   # Get a drip component by name
   component: getComponent
   components: components
+  publish: (name) ->
+    _.each components, (c) -> c.publish name
   inject: (compName, props) ->
     into = props.into
     compContainer = componentTemplate compName
