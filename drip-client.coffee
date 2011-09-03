@@ -169,16 +169,22 @@ drip = window.drip = (->
     </div>
   """
 
-  # Intial page render call
-  # fn executed after all coponents are rendered
-  ready: (fn) ->
+  # Intial render for multi-page applications
+  pageRender: (fn) ->
     now.ready ->
       renderAllIn $('body'), fn
+  # Initial render for single-page applications
+  start: (fn) ->
+    now.ready ->
+      fn() if fn?
   # Get a drip component by name
   component: getComponent
+  # Return all maintained components
   components: components
+  # Publish a message for all subscribed
   publish: (name) ->
     _.each components, (c) -> c.publish name
+  # Inject a component into an element
   inject: (compName, props) ->
     into = props.into
     compContainer = componentTemplate compName
