@@ -81,25 +81,24 @@ drip = window.drip = (->
         afterSync() if afterSync?
 
     # Render markup on page
-    draw = ->
+    draw = (fn) ->
       sel.html comp.markup
       postProcessComponent sel
       ev.emit "ready-#{name}"
+      fn() if fn?
 
     # Render the component
     # Called in initial page load
     # Subsequent rendering should use component.refresh
     render = (fn) ->
       sync ->
-        draw()
-        fn() if fn?
+        draw fn
 
     # Render a component again
     reRender = (args = {}) ->
       sync ->
         args.before() if args.before?
-        draw()
-        args.after() if args.after?
+        draw args.after
 
     components[name] = sel
 
@@ -169,6 +168,21 @@ drip = window.drip = (->
     </div>
   """
 
+  # Wrapper around PathJS to expose routing and
+  # transition declarations
+  router = (->
+    eachPair = (c, f) ->
+      _.each _.keys(c), (k) -> f k, c[k]
+    route: (path, action) ->
+      that = this
+      Path.map("#!#{path}").to ->
+        action.apply that
+    replace: (pairs) ->
+      eachPair pairs, (replaceId, compName) ->
+        drip.inject compName,
+          into: $("##{replaceId}")
+  )()
+
   # Intial render for multi-page applications
   pageRender: (fn) ->
     now.ready ->
@@ -176,7 +190,8 @@ drip = window.drip = (->
   # Initial render for single-page applications
   start: (fn) ->
     now.ready ->
-      fn() if fn?
+      fn.apply router if fn?
+      Path.listen()
   # Get a drip component by name
   component: getComponent
   # Return all maintained components
