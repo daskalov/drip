@@ -100,15 +100,13 @@ drip = window.drip = (->
         args.before() if args.before?
         draw args.after
 
-    components[name] = sel
-
     sel.sync = sync
     sel.draw = draw
     sel.render = render
     sel.refresh = reRender
     sel.send = receiveEvents.emitGroup
     sel.publish = subscribeEvents.emitGroup
-    sel
+    components[name] = sel
 
 
   # Render a single component from a jQuery selector
@@ -158,16 +156,6 @@ drip = window.drip = (->
   # Object for all inter-component events
   ev = eventSystem()
 
-  # Retrieve a component by name
-  getComponent = (name) -> components[name]
-
-  # Create an empty component container
-  # NOTE: Client dupliacte of helper in `drip.clientHelpers`
-  componentTemplate = (compName) -> """
-    <div component="#{compName}" drip="true">
-    </div>
-  """
-
   # Wrapper around PathJS to expose routing and
   # transition declarations
   router = (->
@@ -180,8 +168,18 @@ drip = window.drip = (->
     replace: (pairs) ->
       eachPair pairs, (replaceId, compName) ->
         drip.inject compName,
-          into: $("##{replaceId}")
+          into: $ '#' + replaceId
   )()
+
+  # Retrieve a component by name
+  getComponent = (name) -> components[name]
+
+  # Create an empty component container
+  # NOTE: Client dupliacte of helper in `drip.clientHelpers`
+  componentTemplate = (compName) -> """
+    <div component="#{compName}" drip="true">
+    </div>
+  """
 
   # Intial render for multi-page applications
   pageRender: (fn) ->
