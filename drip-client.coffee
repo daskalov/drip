@@ -163,8 +163,9 @@ drip = window.drip = (->
     freshFns = {}
     transitions = {}
     setFresh: (p, fn) -> freshFns[p] = fn
-    transition: (from, to, fn) ->
-      transitions[ [from, to] ] = fn
+    transition: (props) ->
+      transitions[ [props.from, props.to] ] = props.forward
+      transitions[ [props.to, props.from] ] = props.reverse
     advance: (newState) ->
       tr = transitions[ [current, newState] ]
       freshFn = freshFns[newState]
