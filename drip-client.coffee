@@ -160,14 +160,14 @@ drip = window.drip = (->
   # transition function invocation
   fsm = (->
     current = 'fresh'
-    state: current
-    freshFn = null
-    transitions = {}
-    fresh: (fn) -> freshFn = fn
+    freshFns = {}
+    ransitions = {}
+    setFresh: (p, fn) -> freshFns[p] = fn
     transition: (from, to, fn) ->
       transitions[ [from, to] ] = fn
     advance: (newState) ->
       tr = transitions[ [current, newState] ]
+      freshFn = freshFns[newState]
       isFresh = current is 'fresh'
       fn = if isFresh or tr is undefined then freshFn else tr
       fn.apply this
@@ -185,7 +185,7 @@ drip = window.drip = (->
       that = this
       that.path = path
       Path.map('#!' + path).to ->
-        action.apply that
+        fsm.setFresh path, action
         fsm.advance.apply that, [path]
     replace: (pairs) ->
       eachPair pairs, (replaceId, compName) ->
