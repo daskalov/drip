@@ -161,7 +161,7 @@ drip = window.drip = (->
   fsm = (->
     current = 'fresh'
     freshFns = {}
-    ransitions = {}
+    transitions = {}
     setFresh: (p, fn) -> freshFns[p] = fn
     transition: (from, to, fn) ->
       transitions[ [from, to] ] = fn
@@ -184,8 +184,8 @@ drip = window.drip = (->
     route: (path, action) ->
       that = this
       that.path = path
+      fsm.setFresh path, action
       Path.map('#!' + path).to ->
-        fsm.setFresh path, action
         fsm.advance.apply that, [path]
     replace: (pairs) ->
       eachPair pairs, (replaceId, compName) ->
