@@ -156,15 +156,39 @@ drip = window.drip = (->
   # Object for all inter-component events
   ev = eventSystem()
 
+  # Maintain path state and state -> state
+  # transition function invocation
+  fsm = (->
+    current = 'fresh'
+    isFresh: -> current is 'fresh'
+    state: current
+    freshFn = null
+    transitions = {}
+    fresh: (fn) -> freshFn = fn
+    transition: (from, to, fn) ->
+      transitions[ [from, to] ] = fn
+    advance: (ctx, newState) ->
+      if current is 'fresh'
+        freshFn.apply ctx if freshFn?
+      else
+        tr = transitions[ [current, newState] ]
+        (if tr? then tr else freshFn).apply ctx
+      current = newState
+  )()
+
   # Wrapper around PathJS to expose routing and
   # transition declarations
   router = (->
     eachPair = (c, f) ->
       _.each _.keys(c), (k) -> f k, c[k]
+    fresh: fsm.fresh
+    transition: fsm.transition
     route: (path, action) ->
       that = this
-      Path.map("#!#{path}").to ->
+      that.path = path
+      Path.map('#!' + path).to ->
         action.apply that
+        fsm.advance that, path
     replace: (pairs) ->
       eachPair pairs, (replaceId, compName) ->
         drip.inject compName,
