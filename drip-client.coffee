@@ -47,11 +47,13 @@ drip = window.drip = (->
     # of a specific component
     evalPostRender = (postFn) ->
       postFnStr = $(postFn).html()
+      # Define the local interface exposed to
+      # a component's post-render function
       postFnPreStr = '''
-        var d = byDrip;
-        var current = sel;
-        var c = getComponent
-        var receive = receiveEvents.add;
+        var d         = byDrip;
+        var current   = sel;
+        var c         = getComponent
+        var receive   = receiveEvents.add;
         var subscribe = subscribeEvents.add;
       '''
       postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
