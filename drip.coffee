@@ -17,11 +17,7 @@ coreHelpers =
   # Ad-hoc form useful in packaging groups of
   # user-submitted values
   dripform: (dId, inner) ->
-    attrs = {}
-    attrs.drip = dId
-    attrs.dripform = 'true'
-    attrs.id = 'drip_form'
-    div attrs, inner
+    form drip: dId, inner
 
 # Compile post-render function
 # Sent as a string to the client to be eval'd in context

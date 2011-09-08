@@ -35,7 +35,7 @@ drip = window.drip = (->
         parts = dripId.guidToDrip guid
         e if parts? and parts.name is name and parts.drip is dId
       found = $ _.first els
-      found.package = -> formPackage found
+      found.package = formPackage
       found
 
     # receive / send
@@ -138,13 +138,12 @@ drip = window.drip = (->
 
   # Create an object with form element key-value pairs
   #   name attribute: form value
-  formPackage = (form) ->
-    formPairs = {}
-    _.each form.children(), (c) ->
-      c = $(c) unless c.attr?
-      nameAttr = c.attr('name')
-      formPairs[nameAttr] = c.val() if nameAttr?
-    formPairs
+  formPackage = ->
+    _.reduce @serializeArray(),
+      (ret, h) ->
+        ret[h.name] = h.value
+        ret
+      {}
 
   # Basic event system
   eventSystem = ->
