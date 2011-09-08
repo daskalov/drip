@@ -106,6 +106,7 @@ drip = window.drip = (->
     sel.refresh = reRender
     sel.send = receiveEvents.emitGroup
     sel.publish = subscribeEvents.emitGroup
+    sel.element = byDrip
     components[name] = sel
 
 
