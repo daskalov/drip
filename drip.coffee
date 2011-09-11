@@ -10,6 +10,8 @@ helpers = {}
 components = {}
 # Holds all UI helper functions
 uiHelpers = {}
+# Reference the session store
+sessionStore = null
 
 # Helpers available to templates provided
 # by any drip component
@@ -128,6 +130,11 @@ drip.component = (compName, props) ->
   components[compName] = props
   props
 
+# Retrieve session in a now context
+drip.session = (ctx, sessionHandler) ->
+  sessionId = ctx.socket.handshake.sessionId
+  sessionStore.get sessionId, sessionHandler
+
 # Drip initialization
 # drip.init
 #   now:
@@ -152,11 +159,9 @@ drip.init = (props) ->
   # Setup the server-side now function
   # clients will call to fetch components
   everyone.now.driprender = (name, path, clientHandler) ->
-    # Grab the client's session exposing it to
-    # the component render scope
-    sessionId = @socket.handshake.sessionId
     that = this
-    sessionStore.get sessionId, (err, session) ->
+    # Expose client's session to render scope
+    drip.session this, (err, session) ->
       unless err?
         extraScopes =
           socket:  that.socket
