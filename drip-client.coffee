@@ -43,6 +43,12 @@ drip = window.drip = (->
     # subscribe / publish
     subscribeEvents = eventSystem()
 
+    # Convenience wrapper for jQuery .submit
+    submitHelper = (accFn) -> (dId, fn) ->
+      accFn(dId).submit ->
+        fn()
+        return false
+
     # Eval post render function in the context
     # of a specific component
     evalPostRender = (postFn) ->
@@ -55,6 +61,7 @@ drip = window.drip = (->
         var c         = getComponent
         var receive   = receiveEvents.add;
         var subscribe = subscribeEvents.add;
+        var submit    = submitHelper(d);
       '''
       postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
       eval postFnStrPrime
