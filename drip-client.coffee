@@ -159,8 +159,8 @@ drip = window.drip = (->
     events = {}
     set: (name, fn) -> events[name] = fn
     emit: (name) -> events[name]() if events[name]?
-    emitGroup: (name) -> if events[name]?
-      _.each events[name], (f) -> f()
+    emitGroup: (name, args...) -> if events[name]?
+      _.each events[name], (f) -> f args...
     add: (name, fn) -> (events[name] ||= []).push fn
   # Object for all inter-component events
   ev = eventSystem()
