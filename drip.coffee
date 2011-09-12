@@ -1,7 +1,5 @@
 coffeekup = require 'coffeekup'
 _ = require 'underscore'
-Sherpa = require('./sherpa/sherpa/nodejs').Sherpa
-sherpaRouter = new Sherpa.Router
 
 
 ckup = coffeekup.render
@@ -12,6 +10,9 @@ components = {}
 uiHelpers = {}
 # Reference the session store
 sessionStore = null
+
+# Router object for multi-page applications
+router = null
 
 # Helpers available to templates provided
 # by any drip component
@@ -37,16 +38,6 @@ renderTemplate = (tmpl, xtra) ->
                   drip.clientHelpers.hardcode
   ckup tmpl, _.extend(xtra, { hardcode: hard })
 
-# Sherpa wrapper
-sherpa = (->
-  paths = {}
-  add = (path) -> unless paths[path]
-    paths[path] = sherpaRouter.add('#!' + path).to('')
-  parameterize: (matchPath, path) ->
-    add matchPath
-    rec = sherpaRouter.recognize path
-    if rec? then rec.params else null
-)()
 
 # Parse a cookie string into an object with key-value pairs
 # representing the key-value pairs in the cookie
@@ -87,12 +78,11 @@ drip.ui = (els) ->
 
 # Capture variables from a path
 drip.capture = (path) -> (matchPath, paramsHandler) ->
-  console.log "MATCHING: #{path} against #{matchPath}"
-  params = sherpa.parameterize matchPath, path
+  params = router.parameterize matchPath, path
   if params?
     paramsHandler null, params
   else
-    paramsHandler "no-match"
+    paramsHandler "no match"
 
 # Main render function
 # Render a drip component's template with
@@ -154,6 +144,7 @@ drip.init = (props) ->
   nowjs = props.now.now
   sessionKey = props.session.key
   sessionStore = props.session.store
+  router = props.router
   # Set sessionID during handshake to expose it for render call
   nowjs.server.set 'authorization', (data, accept) ->
     cookie = data.headers.cookie
