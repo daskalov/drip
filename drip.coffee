@@ -85,19 +85,23 @@ drip = exports
 drip.ui = (els) ->
   uiHelpers = _.extend uiHelpers, els
 
+# Capture variables from a path
+drip.capture = (path) -> (matchPath, paramsHandler) ->
+  console.log "MATCHING: #{path} against #{matchPath}"
+  params = sherpa.parameterize matchPath, path
+  if params?
+    paramsHandler null, params
+  else
+    paramsHandler "no-match"
+
 # Main render function
 # Render a drip component's template with
 # the scope specified by the component in scope
 drip.nowRender = (name, path, injectedScopes, clientHandler) ->
   comp = components[name]
   scopeObj =
-    # Capture variables from URL
-    capture: (matchPath, paramsHandler) ->
-      params = sherpa.parameterize matchPath, path
-      if params?
-        paramsHandler null, params
-      else
-        paramsHandler "no-match"
+    # Expose capture function for this path
+    capture: drip.capture path
     # Expose variables to view
     expose: (exposed...) ->
       fullScope = _.extend injectedScopes, exposed...
