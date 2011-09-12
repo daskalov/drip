@@ -139,6 +139,7 @@ drip.session = (ctx, sessionHandler) ->
 #   session:
 #     key: key
 #     store: store
+#   router: router
 drip.init = (props) ->
   everyone = props.now.everyone
   nowjs = props.now.now
@@ -155,16 +156,16 @@ drip.init = (props) ->
     else accept 'Missing cookie. Authorization failed.', false
   # Setup the server-side now function
   # clients will call to fetch components
-  everyone.now.driprender = (name, path, pathParams, clientHandler) ->
+  everyone.now.driprender = (name, path, params, clientHandler) ->
     that = this
     # Expose client's session to render scope
     drip.session this, (err, session) ->
       unless err?
-        extraScopes =
+        extras =
           socket:  that.socket
           session: session
           nowuser: that.user
-        extraScopes.user = session.user if session?
-        drip.nowRender(name, path, pathParams, extraScopes, clientHandler)
+        extras.user = session.user if session?
+        drip.nowRender name, path, params, extras, clientHandler
       else
         throw "Couldn't retrieve the session"
