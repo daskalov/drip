@@ -165,17 +165,21 @@ drip = window.drip = (->
   # Object for all inter-component events
   ev = eventSystem()
 
-  # Maintain path state and state -> state
+
+  # Control path state and state -> state
   # transition function invocation
   fsm = (->
     current = 'fresh'
     freshFns = {}
     transitions = {}
+    currentParams = {}
+    params: -> currentParams
     setFresh: (p, fn) -> freshFns[p] = fn
     transition: (props) ->
       transitions[ [props.from, props.to] ] = props.forward
       transitions[ [props.to, props.from] ] = props.reverse
-    advance: (newState) ->
+    advance: (newState, params) ->
+      currentParams = params
       tr = transitions[ [current, newState] ]
       freshFn = freshFns[newState]
       isFresh = current is 'fresh'
@@ -196,7 +200,7 @@ drip = window.drip = (->
       that.path = path
       fsm.setFresh path, action
       Path.map('#!' + path).to ->
-        fsm.advance.apply that, [path]
+        fsm.advance.apply that, [path, @params]
     replace: (pairs) ->
       eachPair pairs, (replaceId, compName) ->
         drip.inject compName,
@@ -226,6 +230,8 @@ drip = window.drip = (->
   component: getComponent
   # Return all maintained components
   components: components
+  # Return object of current path params
+  params: fsm.params
   # Publish a message for all subscribed
   publish: (name) ->
     _.each components, (c) -> c.publish name
