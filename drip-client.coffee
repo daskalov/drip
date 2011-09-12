@@ -79,7 +79,7 @@ drip = window.drip = (->
     # Fetch server-side data
     sync = (afterSync) ->
       hash = window.location.hash
-      now.driprender name, hash, (mk, postFn) ->
+      now.driprender name, hash, drip.params(), (mk, postFn) ->
         comp.markup = mk
         comp.postRender = ->
           # Render any nested components
