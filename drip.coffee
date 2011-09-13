@@ -99,7 +99,7 @@ drip.nowRender = (name, path, pathParams, injectedScopes, clientHandler) ->
       fullScope = _.extend injectedScopes, exposed...
       markup = renderTemplate comp.render, fullScope
       clientHandler markup, compilePostRender(comp)
-  comp.scope scopeObj
+  comp.scope.apply scopeObj, [ scopeObj ]
 
 # Drip helpers for templates
 # Used to supply a template with the local `component`
