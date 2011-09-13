@@ -1,18 +1,6 @@
 drip = window.drip = (->
   components = {}
 
-  # Mappings between drip ids relative to a
-  # component and guids held on element attributes
-  dripId =
-    GUID_SEPERATOR: '___'
-    dripToGuid: (cname, dripId) ->
-      "#{cname}#{@GUID_SEPERATOR}#{dripId}"
-    guidToDrip: (gu) ->
-      return undefined unless gu?
-      [nm, dId] = gu.split @GUID_SEPERATOR
-      name: nm
-      drip: dId
-
   # Apply fn recursively to every child of sel
   applyToAllChildren = (sel, fn) ->
     descend = (els) -> unless _.isEmpty els
@@ -27,6 +15,18 @@ drip = window.drip = (->
   component = (sel) ->
     comp = sel.drip = {}
     name = sel.attr 'component'
+
+    # Mappings between drip ids relative to a
+    # component and guids held on element attributes
+    dripId =
+      GUID_SEPERATOR: '___'
+      dripToGuid: (cname, dripId) ->
+        "#{cname}#{@GUID_SEPERATOR}#{dripId}"
+      guidToDrip: (gu) ->
+        return undefined unless gu?
+        [nm, dId] = gu.split @GUID_SEPERATOR
+        name: nm
+        drip: dId
 
     # Retrieve an element from the component by drip id
     byDrip = (dId) ->
@@ -45,7 +45,8 @@ drip = window.drip = (->
 
     # Convenience wrapper for jQuery .submit
     submitHelper = (accFn) -> (dId, fn) ->
-      accFn(dId).submit ->
+      el = accFn dId
+      el.unbind('submit').submit ->
         fn()
         return false
 
@@ -59,8 +60,8 @@ drip = window.drip = (->
         var d         = byDrip;
         var current   = sel;
         var c         = getComponent
-        var receive   = receiveEvents.add;
-        var subscribe = subscribeEvents.add;
+        var receive   = receiveEvents.set;
+        var subscribe = subscribeEvents.set;
         var submit    = submitHelper(d);
       '''
       postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
@@ -113,8 +114,8 @@ drip = window.drip = (->
     sel.draw = draw
     sel.render = render
     sel.refresh = reRender
-    sel.send = receiveEvents.emitGroup
-    sel.publish = subscribeEvents.emitGroup
+    sel.send = receiveEvents.emit
+    sel.publish = subscribeEvents.emit
     sel.element = byDrip
     components[name] = sel
 
@@ -158,13 +159,13 @@ drip = window.drip = (->
   eventSystem = ->
     events = {}
     set: (name, fn) -> events[name] = fn
-    emit: (name) -> events[name]() if events[name]?
+    emit: (name, args...) ->
+      events[name] args... if events[name]?
     emitGroup: (name, args...) -> if events[name]?
       _.each events[name], (f) -> f args...
     add: (name, fn) -> (events[name] ||= []).push fn
   # Object for all inter-component events
   ev = eventSystem()
-
 
   # Control path state and state -> state
   # transition function invocation
