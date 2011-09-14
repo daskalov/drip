@@ -94,6 +94,7 @@ drip = window.drip = (->
     draw = (fn) ->
       sel.html comp.markup
       postProcessComponent sel
+      ev.emit "insert-#{name}"
       ev.emit "ready-#{name}"
       fn() if fn?
 
@@ -241,6 +242,7 @@ drip = window.drip = (->
     into = props.into
     compContainer = componentTemplate compName
     comp = component $(compContainer)
-    into.html comp
+    ev.set "insert-#{compName}", ->
+      into.html comp
     comp.refresh props
 )()
