@@ -74,7 +74,8 @@ drip = exports
 
 # Add to UI elements available to drip components
 drip.ui = (els) ->
-  uiHelpers = _.extend uiHelpers, els
+  _.extend uiHelpers, els if els?
+  uiHelpers
 
 # Capture variables from a path
 drip.capture = (path) -> (matchPath, paramsHandler) ->
