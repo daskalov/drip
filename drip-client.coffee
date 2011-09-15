@@ -219,6 +219,10 @@ drip = window.drip = (->
     </div>
   """
 
+  # Alternate calling one of two functions
+  alternate = (fns, s = false) -> ->
+    if s = not s then fns.a() else fns.b()
+
   # Intial render for multi-page applications
   pageRender: (fn) ->
     now.ready ->
@@ -237,6 +241,22 @@ drip = window.drip = (->
   # Publish a message for all subscribed
   publish: (name) ->
     _.each components, (c) -> c.publish name
+  # Toggle between some markup and a component
+  toggler: (p) ->
+    fwd = p.transition && p.transition.forward
+    rev = p.transition && p.transition.reverse
+    old = null
+    alternate
+      a: ->
+        old = p.from.html()
+        drip.inject p.to,
+          into: p.from
+          before: p.before
+          after: p.after
+        fwd() if fwd?
+      b: ->
+        p.from.html old
+        rev() if rev?
   # Inject a component into an element
   inject: (compName, props) ->
     into = props.into
