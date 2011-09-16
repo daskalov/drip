@@ -80,7 +80,11 @@ drip = window.drip = (->
     # Fetch server-side data
     sync = (afterSync) ->
       hash = window.location.hash
-      now.driprender name, hash, drip.params(), (mk, postFn) ->
+      pr =
+        name: name
+        hash: hash
+        params: drip.params()
+      now.driprender pr, (mk, postFn) ->
         comp.markup = mk
         comp.postRender = ->
           # Render any nested components
@@ -245,6 +249,7 @@ drip = window.drip = (->
   toggler: (p) ->
     fwd = p.transition && p.transition.forward
     rev = p.transition && p.transition.reverse
+    prerev = p.transition && p.transition.preReverse
     old = null
     alternate
       a: ->
@@ -255,7 +260,8 @@ drip = window.drip = (->
           after: p.after
         fwd() if fwd?
       b: ->
-        p.from.html old
+        action = -> p.from.html old
+        if prerev? then prerev action else action()
         rev() if rev?
   # Inject a component into an element
   inject: (compName, props) ->

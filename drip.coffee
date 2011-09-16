@@ -88,16 +88,16 @@ drip.capture = (path) -> (matchPath, paramsHandler) ->
 # Main render function
 # Render a drip component's template with
 # the scope specified by the component in scope
-drip.nowRender = (name, path, pathParams, injectedScopes, clientHandler) ->
-  comp = components[name]
+drip.nowRender = (props, clientHandler) ->
+  comp = components[props.name]
   scopeObj =
     # Expose capture function for this path
-    capture: drip.capture path
+    capture: drip.capture props.hash
     # Expose params captured on the client
-    params: pathParams
+    params: props.params
     # Expose variables to view
     expose: (exposed...) ->
-      fullScope = _.extend injectedScopes, exposed...
+      fullScope = _.extend props.extras, exposed...
       markup = renderTemplate comp.render, fullScope
       clientHandler markup, compilePostRender(comp)
   comp.scope.apply scopeObj, [ scopeObj ]
@@ -157,16 +157,16 @@ drip.init = (props) ->
     else accept 'Missing cookie. Authorization failed.', false
   # Setup the server-side now function
   # clients will call to fetch components
-  everyone.now.driprender = (name, path, params, clientHandler) ->
+  everyone.now.driprender = (props, clientHandler) ->
     that = this
     # Expose client's session to render scope
     drip.session this, (err, session) ->
       unless err?
-        extras =
+        props.extras = extras =
           socket:  that.socket
           session: session
           nowuser: that.user
         extras.user = session.user if session?
-        drip.nowRender name, path, params, extras, clientHandler
+        drip.nowRender props, clientHandler
       else
         throw "Couldn't retrieve the session"
