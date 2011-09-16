@@ -12,7 +12,7 @@ drip = window.drip = (->
 
   # Augment jQuery selector with drip properties
   # Represents a single drip component
-  component = (sel) ->
+  component = (sel, compArgs) ->
     comp = sel.drip = {}
     name = sel.attr 'component'
 
@@ -84,6 +84,7 @@ drip = window.drip = (->
         name: name
         hash: hash
         params: drip.params()
+        args: compArgs
       now.driprender pr, (mk, postFn) ->
         comp.markup = mk
         comp.postRender = ->
@@ -266,7 +267,7 @@ drip = window.drip = (->
   inject: (compName, props) ->
     into = props.into
     compContainer = componentTemplate compName
-    comp = component $(compContainer)
+    comp = component $(compContainer), props.args
     ev.set "insert-#{compName}", ->
       into.html comp
     comp.refresh props
