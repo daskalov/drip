@@ -254,10 +254,9 @@ drip = window.drip = (->
     alternate
       a: ->
         old = p.from.html()
-        drip.inject p.to,
-          into: p.from
-          before: p.before
-          after: p.after
+        p.inject ||= {}
+        p.inject.into = p.from
+        drip.inject p.to, p.inject
         fwd() if fwd?
       b: ->
         action = -> p.from.html old
