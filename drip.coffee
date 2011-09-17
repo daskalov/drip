@@ -90,7 +90,6 @@ drip.capture = (path) -> (matchPath, paramsHandler) ->
 # the scope specified by the component in scope
 drip.nowRender = (props, clientHandler) ->
   comp = components[props.name]
-  console.log "\n\n\t\t\t----> ARGS: #{props.args[0] if props.args?}\n\n"
   scopeObj =
     # Expose capture function for this path
     capture: drip.capture props.hash

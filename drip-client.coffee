@@ -241,6 +241,9 @@ drip = window.drip = (->
   component: getComponent
   # Return all maintained components
   components: components
+  # Refresh the entire page
+  refreshPage: -> _.each components, (c) ->
+    c.refresh()
   # Return object of current path params
   params: fsm.params
   # Publish a message for all subscribed
