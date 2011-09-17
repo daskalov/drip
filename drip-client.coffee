@@ -15,6 +15,7 @@ drip = window.drip = (->
   component = (sel, compArgs) ->
     comp = sel.drip = {}
     name = sel.attr 'component'
+    comp.args = compArgs if compArgs?
 
     # Mappings between drip ids relative to a
     # component and guids held on element attributes
@@ -116,6 +117,7 @@ drip = window.drip = (->
         args.before() if args.before?
         draw args.after
 
+    sel.args = comp.args
     sel.sync = sync
     sel.draw = draw
     sel.render = render
