@@ -43,17 +43,22 @@ drip = window.drip = (->
     receiveEvents = eventSystem()
     # subscribe / publish
     subscribeEvents = eventSystem()
+    # setup / teardwon
+    lifecycleEvents = eventSystem()
 
-    # Convenience wrapper for jQuery .submit
-    submitHelper = (accFn) -> (dId, fn) ->
-      el = accFn dId
-      el.unbind('submit').submit ->
-        fn()
-        return false
 
     # Eval post render function in the context
     # of a specific component
     evalPostRender = (postFn) ->
+      # Convenience wrapper for jQuery .submit
+      submitHelper = (accFn) -> (dId, fn) ->
+        el = accFn dId
+        el.unbind('submit').submit ->
+          fn()
+          return false
+      # Curry lifecycle setting
+      lifecycleSet = (evName) -> (fn) ->
+        lifecycleEvents.set evName, fn
       postFnStr = $(postFn).html()
       # Define the local interface exposed to
       # a component's post-render function
@@ -63,6 +68,8 @@ drip = window.drip = (->
         var c         = getComponent
         var receive   = receiveEvents.set;
         var subscribe = subscribeEvents.set;
+        var setup = lifecycleSet('setup');
+        var teardown = lifecycleSet('teardown');
         var submit    = submitHelper(d);
       '''
       postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
@@ -93,6 +100,8 @@ drip = window.drip = (->
           renderAllIn sel
           # Execute component's ready function
           evalPostRender postFn
+          # Execute any component setup
+          sel.setup()
         ev.set "ready-#{name}", comp.postRender
         afterSync() if afterSync?
 
@@ -117,13 +126,16 @@ drip = window.drip = (->
         args.before() if args.before?
         draw args.after
 
-    sel.args = comp.args
-    sel.sync = sync
-    sel.draw = draw
-    sel.render = render
+
+    sel.args    = comp.args
+    sel.sync    = sync
+    sel.draw    = draw
+    sel.render  = render
     sel.refresh = reRender
-    sel.send = receiveEvents.emit
+    sel.send    = receiveEvents.emit
     sel.publish = subscribeEvents.emit
+    sel.setup = -> lifecycleEvents.emit 'setup'
+    sel.teardown = -> lifecycleEvents.emit 'teardown'
     sel.element = byDrip
     components[name] = sel
 
