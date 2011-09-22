@@ -263,11 +263,14 @@ drip = window.drip = (->
   # Publish a message for all subscribed
   publish: (name) ->
     _.each components, (c) -> c.publish name
+  # Go to some path
+  to: (p) -> window.location.hash = '#!/' + p
   # Toggle between some markup and a component
   toggler: (p) ->
     fwd = p.transition && p.transition.forward
     rev = p.transition && p.transition.reverse
     prerev = p.transition && p.transition.preReverse
+    both = p.transition && p.transition.both
     old = null
     alternate
       a: ->
@@ -276,10 +279,12 @@ drip = window.drip = (->
         p.inject.into = p.from
         drip.inject p.to, p.inject
         fwd() if fwd?
+        both() if both?
       b: ->
         action = -> p.from.html old
         if prerev? then prerev action else action()
         rev() if rev?
+        both() if both?
   # Inject a component into an element
   inject: (compName, props) ->
     into = props.into
