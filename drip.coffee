@@ -38,7 +38,6 @@ renderTemplate = (tmpl, xtra) ->
                   drip.clientHelpers.hardcode
   ckup tmpl, _.extend(xtra, { hardcode: hard })
 
-
 # Parse a cookie string into an object with key-value pairs
 # representing the key-value pairs in the cookie
 # Follows `connect.utils.parseCookie`
@@ -99,7 +98,8 @@ drip.nowRender = (props, clientHandler) ->
     args: props.args
     # Expose variables to view
     expose: (exposed...) ->
-      fullScope = _.extend props.extras, exposed...
+      extras = props.extras || {}
+      fullScope = _.extend extras, exposed...
       markup = renderTemplate comp.render, fullScope
       clientHandler markup, compilePostRender(comp)
   comp.scope.apply scopeObj, [ scopeObj ]
@@ -146,8 +146,8 @@ drip.session = (ctx, sessionHandler) ->
 drip.init = (props) ->
   everyone = props.now.everyone
   nowjs = props.now.now
-  sessionKey = props.session.key
-  sessionStore = props.session.store
+  sessionKey = props.session && props.session.key
+  sessionStore = props.session && props.session.store
   router = props.router
   # Set sessionID during handshake to expose it for render call
   nowjs.server.set 'authorization', (data, accept) ->
