@@ -46,7 +46,6 @@ drip = window.drip = (->
     # setup / teardwon
     lifecycleEvents = eventSystem()
 
-
     # Eval post render function in the context
     # of a specific component
     evalPostRender = (postFn) ->
@@ -68,8 +67,8 @@ drip = window.drip = (->
         var c         = getComponent
         var receive   = receiveEvents.set;
         var subscribe = subscribeEvents.set;
-        var setup = lifecycleSet('setup');
-        var teardown = lifecycleSet('teardown');
+        var setup     = lifecycleSet('setup');
+        var teardown  = lifecycleSet('teardown');
         var submit    = submitHelper(d);
       '''
       postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
@@ -127,16 +126,16 @@ drip = window.drip = (->
         draw args.after
 
 
-    sel.args    = comp.args
-    sel.sync    = sync
-    sel.draw    = draw
-    sel.render  = render
-    sel.refresh = reRender
-    sel.send    = receiveEvents.emit
-    sel.publish = subscribeEvents.emit
-    sel.setup = -> lifecycleEvents.emit 'setup'
+    sel.args     = comp.args
+    sel.sync     = sync
+    sel.draw     = draw
+    sel.render   = render
+    sel.refresh  = reRender
+    sel.send     = receiveEvents.emit
+    sel.publish  = subscribeEvents.emit
+    sel.setup    = -> lifecycleEvents.emit 'setup'
     sel.teardown = -> lifecycleEvents.emit 'teardown'
-    sel.element = byDrip
+    sel.element  = byDrip
     components[name] = sel
 
 

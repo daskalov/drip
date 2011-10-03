@@ -2,15 +2,14 @@ coffeekup = require 'coffeekup'
 _ = require 'underscore'
 
 
+# Alias Coffeekup render function
 ckup = coffeekup.render
-helpers = {}
 # Holds all renderable components
 components = {}
 # Holds all UI helper functions
 uiHelpers = {}
 # Reference the session store
 sessionStore = null
-
 # Router object for multi-page applications
 router = null
 
@@ -32,8 +31,7 @@ compilePostRender = (comp) ->
 
 # CoffeeKup render a template with extra scope
 renderTemplate = (tmpl, xtra) ->
-  hard = _.extend helpers,
-                  coreHelpers,
+  hard = _.extend coreHelpers,
                   uiHelpers,
                   drip.clientHelpers.hardcode
   ckup tmpl, _.extend(xtra, { hardcode: hard })
