@@ -1,5 +1,6 @@
 drip = window.drip = (->
   components = {}
+  uniqueNum = 0
 
   # Apply fn recursively to every child of sel
   applyToAllChildren = (sel, fn) ->
@@ -17,24 +18,32 @@ drip = window.drip = (->
     name = sel.attr 'component'
     comp.args = compArgs if compArgs?
 
+    # Set unique string used to disambiguate
+    # components with the same name
+    unique = String ++uniqueNum
+
     # Mappings between drip ids relative to a
     # component and guids held on element attributes
     dripId =
-      GUID_SEPERATOR: '___'
+      SEPERATOR: '___'
       dripToGuid: (cname, dripId) ->
-        "#{cname}#{@GUID_SEPERATOR}#{dripId}"
+        cname + @SEPERATOR + dripId + @SEPERATOR + unique
       guidToDrip: (gu) ->
         return undefined unless gu?
-        [nm, dId] = gu.split @GUID_SEPERATOR
+        [nm, dId, u] = gu.split @SEPERATOR
         name: nm
         drip: dId
+        unique: u
 
     # Retrieve an element from the component by drip id
     byDrip = (dId) ->
       els = _.filter $('*'), (e) ->
         guid = $(e).attr('guid')
         parts = dripId.guidToDrip guid
-        e if parts? and parts.name is name and parts.drip is dId
+        e if parts?
+          and parts.name is name
+          and parts.drip is dId
+          and parts.unique is unique
       found = $ _.first els
       found.package = formPackage
       found
