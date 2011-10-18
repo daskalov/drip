@@ -40,11 +40,11 @@ drip = window.drip = (->
       els = _.filter $('*'), (e) ->
         guid = $(e).attr('guid')
         parts = dripId.guidToDrip guid
-        e if parts?
-          and parts.name is name
-          and parts.drip is dId
-          and parts.unique is unique
-      found = $ _.first els
+        e if parts? and
+          parts.name is name and
+          parts.drip is dId and
+          parts.unique is unique
+      found = $ els
       found.package = formPackage
       found
 
@@ -277,6 +277,17 @@ drip = window.drip = (->
     _.each components, (c) -> c.publish name
   # Go to some path
   to: (p) -> window.location.hash = '#!/' + p
+  # Basic wizard helper
+  wizard: (d, name, p) ->
+    states = p.states
+    panes = _.map states, d
+    curr = 14999
+    change = (idx) ->
+      d(name).html(panes[idx % panes.length])
+    next = -> change ++curr
+    prev = -> change --curr
+    next()
+    [prev, next]
   # Toggle between some markup and a component
   toggler: (p) ->
     fwd = p.transition && p.transition.forward
@@ -297,7 +308,6 @@ drip = window.drip = (->
         if prerev? then prerev action else action()
         rev() if rev?
         both() if both?
-
   # Inject a component into an element
   inject: (compName, props) ->
     into = props.into
