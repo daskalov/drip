@@ -246,9 +246,13 @@ drip = window.drip = (->
     </div>
   """
 
+  # Return a function calling a
+  # collection of functions in turn
+  cyclicApply = (fns, start = 0) -> ->
+    fns[start++ % fns.length]()
+
   # Alternate calling one of two functions
-  alternate = (fns, s = false) -> ->
-    if s = not s then fns.a() else fns.b()
+  alternate = (fns) -> cyclicApply [fns.a, fns.b]
 
   # Intial render for multi-page applications
   pageRender: (fn) ->
@@ -293,6 +297,7 @@ drip = window.drip = (->
         if prerev? then prerev action else action()
         rev() if rev?
         both() if both?
+
   # Inject a component into an element
   inject: (compName, props) ->
     into = props.into
