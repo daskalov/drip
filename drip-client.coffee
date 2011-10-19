@@ -148,11 +148,6 @@ drip = window.drip = (->
     components[name] = sel
 
 
-  # Render a single component from a jQuery selector
-  renderComponent = (sel, fn) ->
-    comp = component sel
-    comp.render fn
-
   # Returns a flat array of every child of sel
   flattenChildren = (sel) ->
     all = []
@@ -162,6 +157,11 @@ drip = window.drip = (->
   # Retrieve all drip components that are children of sel
   componentsIn = (sel) ->
     _.filter flattenChildren(sel), isDrip
+
+  # Render a single component from a jQuery selector
+  renderComponent = (sel, fn) ->
+    comp = component sel
+    comp.render fn
 
   # Render any components that are children of sel
   renderAllIn = (sel, fn) ->
