@@ -246,6 +246,7 @@ drip = window.drip = (->
     </div>
   """
 
+  # Util
   # Return a function calling a
   # collection of functions in turn
   cyclicApply = (fns, start = 0) -> ->
@@ -253,6 +254,19 @@ drip = window.drip = (->
 
   # Alternate calling one of two functions
   alternate = (fns) -> cyclicApply [fns.a, fns.b]
+
+  # Create a simple linked list
+  arrayToList = (arr) ->
+    lastVisited = {}
+    m = []
+    _.each arr, (e) ->
+      lastVisited.next = node =
+        value: e
+        prev: lastVisited
+      m.push e = lastVisited = node
+    (_.first m).prev = _.last m
+    (_.last  m).next = _.first m
+    m
 
   # Intial render for multi-page applications
   pageRender: (fn) ->
@@ -277,17 +291,18 @@ drip = window.drip = (->
     _.each components, (c) -> c.publish name
   # Go to some path
   to: (p) -> window.location.hash = '#!/' + p
+
+  # UI functions
   # Basic wizard helper
   wizard: (d, name, p) ->
-    states = p.states
-    panes = _.map states, d
-    curr = 14999
-    change = (idx) ->
-      d(name).html(panes[idx % panes.length])
-    next = -> change ++curr
-    prev = -> change --curr
-    next()
-    [prev, next]
+    panes = _.map p.states, d
+    curr = _.last arrayToList panes
+    change = (dir) -> ->
+      curr = curr[dir]
+      d(name).html curr.value
+    next: change 'next'
+    prev: change 'prev'
+
   # Toggle between some markup and a component
   toggler: (p) ->
     fwd = p.transition && p.transition.forward
@@ -308,6 +323,7 @@ drip = window.drip = (->
         if prerev? then prerev action else action()
         rev() if rev?
         both() if both?
+
   # Inject a component into an element
   inject: (compName, props) ->
     into = props.into
