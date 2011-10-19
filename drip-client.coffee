@@ -299,7 +299,7 @@ drip = window.drip = (->
     curr = _.last arrayToList panes
     change = (dir) -> ->
       curr = curr[dir]
-      d(name).html curr.value
+      d(name).html curr.value.html()
     next: change 'next'
     prev: change 'prev'
 
