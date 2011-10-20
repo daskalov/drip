@@ -11,11 +11,14 @@ drip = window.drip = (->
         descend kid.children()
     descend sel.children()
 
+  # Retrieve name of a component from a selector
+  nameFromSel = (sel) -> sel.attr 'component'
+
   # Augment jQuery selector with drip properties
   # Represents a single drip component
   component = (sel, compArgs) ->
     comp = sel.drip = {}
-    name = sel.attr 'component'
+    name = nameFromSel sel
     comp.args = compArgs if compArgs?
 
     # Set unique string used to disambiguate
