@@ -161,6 +161,13 @@ drip = window.drip = (->
   componentsIn = (sel) ->
     _.filter flattenChildren(sel), isDrip
 
+  # Iterate over each loaded drip component
+  # that is a child of sel
+  eachComponentIn = (sel, compHandler) ->
+    all = componentsIn sel
+    _.each all, (s) ->
+      compHandler drip.component nameFromSel s
+
   # Render a single component from a jQuery selector
   renderComponent = (sel, fn) ->
     comp = component sel
