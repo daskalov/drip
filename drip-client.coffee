@@ -340,6 +340,7 @@ drip = window.drip = (->
     compContainer = componentTemplate compName
     comp = component $(compContainer), props.args
     ev.set "insert-#{compName}", ->
+      eachComponentIn into, (c) -> c.teardown()
       into.html comp
     comp.refresh props
 )()
