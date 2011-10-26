@@ -222,7 +222,7 @@ drip = window.drip = (->
       tr = transitions[ [current, newState] ]
       freshFn = freshFns[newState]
       isFresh = current is 'fresh'
-      fn = if isFresh or tr is undefined then freshFn else tr
+      fn = if isFresh or not tr? then freshFn else tr
       fn.apply this
       current = newState
   )()
@@ -301,6 +301,10 @@ drip = window.drip = (->
     _.each components, (c) -> c.publish name
   # Go to some path
   to: (p) -> window.location.hash = '#!/' + p
+  # Go synchronously to some path
+  toSync: (p) ->
+    drip.to p
+    window.location.reload()
 
   # UI functions
   # Basic wizard helper
