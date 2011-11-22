@@ -159,14 +159,13 @@ drip.init = (props) ->
   # Setup the server-side now function
   # clients will call to fetch components
   everyone.now.driprender = (props, clientHandler) ->
-    that = this
     # Expose client's session to render scope
-    drip.session this, (err, session) ->
+    drip.session this, (err, session) =>
       unless err?
         props.extras = extras =
-          socket:  that.socket
+          socket:  @socket
           session: session
-          nowuser: that.user
+          nowuser: @user
         extras.user = session.user if session?
         drip.nowRender props, clientHandler
       else
