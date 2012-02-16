@@ -23,11 +23,15 @@ drip = window.drip = (->
     barrier = len
     cbak -> not --barrier
 
-  # Iterate with a barrier
-  barrierEach = (coll, handler) ->
-    spend _.size(coll.length), (done) ->
-      _.each coll, (item) ->
-        handler item, done
+  # Wrap an iterator in a barrier
+  barrierise = (iterFn) -> (coll, handler) ->
+    spend _.size(coll), (done) ->
+      iterFn coll, (iterCallbackArgs...) ->
+        handler iterCallbackArgs..., done
+
+  # Barrier iterators
+  barrierEach = barrierise _.each
+  barrierEachPair = barrierise eachPair
 
   # Augment jQuery selector with drip properties
   # Represents a single drip component
@@ -256,13 +260,12 @@ drip = window.drip = (->
       injections = []
       injectNext = -> unless _.isEmpty injections
         injections.shift()()
-      spend _.size(pairs), (done) ->
-        eachPair pairs, (replaceId, compName) ->
-          injections.push ->
-            drip.inject compName,
-              into: $ '#' + replaceId
-              after: injectNext
-          injectNext() if done()
+      barrierEachPair pairs, (replaceId, compName, done) ->
+        injections.push ->
+          drip.inject compName,
+            into: $ '#' + replaceId
+            after: injectNext
+        injectNext() if done()
   )()
 
   # Retrieve a component by name
