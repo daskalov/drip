@@ -23,6 +23,12 @@ drip = window.drip = (->
     barrier = len
     cbak -> not --barrier
 
+  # Iterate with a barrier
+  barrierEach = (coll, handler) ->
+    spend _.size(coll.length), (done) ->
+      _.each coll, (item) ->
+        handler item, done
+
   # Augment jQuery selector with drip properties
   # Represents a single drip component
   component = (sel, compArgs) ->
@@ -185,10 +191,9 @@ drip = window.drip = (->
   # Render any components that are children of sel
   renderAllIn = (sel, fn) ->
     comps = componentsIn sel
-    barrier = comps.length
-    _.each comps, (sel) ->
-      renderComponent sel, ->
-        fn() if fn? and --barrier == 0
+    barrierEach comps, (cmp, done) ->
+      renderComponent cmp, ->
+        fn() if fn? and done()
 
   # true if a jQuery selector represents a drip object
   isDrip = (sel) -> sel.attr('drip') == 'true'
