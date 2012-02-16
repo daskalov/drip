@@ -14,6 +14,15 @@ drip = window.drip = (->
   # Retrieve name of a component from a selector
   nameFromSel = (sel) -> sel.attr 'component'
 
+  # Call f for every key-value pair
+  eachPair = (c, f) ->
+    _.each _.keys(c), (k) -> f k, c[k]
+
+  # Barrier abstraction
+  spend = (len, cbak) ->
+    barrier = len
+    cbak -> not --barrier
+
   # Augment jQuery selector with drip properties
   # Represents a single drip component
   component = (sel, compArgs) ->
@@ -230,8 +239,6 @@ drip = window.drip = (->
   # Wrapper around PathJS to expose routing and
   # transition declarations
   router = (->
-    eachPair = (c, f) ->
-      _.each _.keys(c), (k) -> f k, c[k]
     fresh: fsm.fresh
     transition: fsm.transition
     route: (path, action) ->
@@ -241,9 +248,6 @@ drip = window.drip = (->
       Path.map('#!' + path).to ->
         fsm.advance.apply that, [path, @params]
     replace: (pairs) ->
-      spend = (len, cbak) ->
-        barrier = len
-        cbak -> not --barrier
       injections = []
       injectNext = -> unless _.isEmpty injections
         injections.shift()()
