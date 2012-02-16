@@ -241,9 +241,19 @@ drip = window.drip = (->
       Path.map('#!' + path).to ->
         fsm.advance.apply that, [path, @params]
     replace: (pairs) ->
-      eachPair pairs, (replaceId, compName) ->
-        drip.inject compName,
-          into: $ '#' + replaceId
+      spend = (len, cbak) ->
+        barrier = len
+        cbak -> not --barrier
+      injections = []
+      injectNext = -> unless _.isEmpty injections
+        injections.shift()()
+      spend _.size(pairs), (done) ->
+        eachPair pairs, (replaceId, compName) ->
+          injections.push ->
+            drip.inject compName,
+              into: $ '#' + replaceId
+              after: injectNext
+          injectNext() if done()
   )()
 
   # Retrieve a component by name
