@@ -1,0 +1,4 @@
+# drip.coffee
+
+drip is an experimental component-oriented UI framework for weaving rich SPA
+GUIs. It is not yet released, so don't depend on anything.
