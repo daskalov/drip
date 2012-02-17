@@ -100,7 +100,7 @@ drip.nowRender = (props, clientHandler) ->
       fullScope = _.extend extras, exposed...
       markup = renderTemplate comp.render, fullScope
       clientHandler markup, compilePostRender(comp)
-    user: props.extras.user
+    user: props.extras and props.extras.user
   comp.scope.apply scopeObj, [ scopeObj ]
 
 # Drip helpers for templates
