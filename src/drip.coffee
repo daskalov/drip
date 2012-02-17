@@ -96,7 +96,7 @@ drip.nowRender = (props, clientHandler) ->
     args: props.args
     # Expose variables to view
     expose: (exposed...) ->
-      extras = props.extras || {}
+      extras = props.extras or {}
       fullScope = _.extend extras, exposed...
       markup = renderTemplate comp.render, fullScope
       clientHandler markup, compilePostRender(comp)
