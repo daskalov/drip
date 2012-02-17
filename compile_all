@@ -1,2 +1,1 @@
-coffee -c drip.coffee
-coffee -c drip-client.coffee
+coffee -o lib/ -wbc src/
