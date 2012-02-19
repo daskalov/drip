@@ -95,7 +95,7 @@ drip = window.drip = (->
       postFnPreStr = '''
         var d         = byDrip;
         var current   = sel;
-        var c         = getComponent
+        var c         = getComponent;
         var receive   = receiveEvents.set;
         var subscribe = subscribeEvents.set;
         var setup     = lifecycleSet('setup');
