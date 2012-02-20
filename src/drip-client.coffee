@@ -316,7 +316,10 @@ drip = window.drip = (->
   # Refresh the entire page
   refreshPage: ->
     bEach components, (done, c) ->
+      ev.emitGroup 'refreshPage' if done()
       c.refresh()
+  # Add a function to call on an async refresh
+  onRefresh: (fn) -> ev.add 'refreshPage', fn
   # Return object of current path params
   params: fsm.params
   # Publish a message for all subscribed
