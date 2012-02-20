@@ -218,7 +218,7 @@ drip = window.drip = (->
     emit: (name, args...) ->
       events[name] args... if events[name]?
     emitGroup: (name, args...) -> if events[name]?
-      _.each events[name], (f) -> f args...
+      _.each events[name].reverse(), (f) -> f args...
     add: (name, fn) -> (events[name] ||= []).push fn
   # Object for all inter-component events
   ev = eventSystem()
