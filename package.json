@@ -1,0 +1,22 @@
+{
+  "name": "drip.coffee",
+  "version": "0.0.1",
+  "description": "Component-oriented UI framework",
+  "author": "Alex Daskalov",
+  "main": "index",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/daskalov/drip.git"
+  },
+  "dependencies": {
+    "coffeekup": "0.3.0beta",
+    "underscore": ">= 1.2.3"
+  },
+  "engines": {
+    "node": ">= 0.4.0"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "devDependencies": {}
+}
