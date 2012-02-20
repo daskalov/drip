@@ -27,11 +27,11 @@ drip = window.drip = (->
   barrierise = (iterFn) -> (coll, handler) ->
     spend _.size(coll), (done) ->
       iterFn coll, (iterCallbackArgs...) ->
-        handler iterCallbackArgs..., done
+        handler done, iterCallbackArgs...
 
   # Barrier iterators
-  barrierEach = barrierise _.each
-  barrierEachPair = barrierise eachPair
+  bEach = barrierise _.each
+  bEachPair = barrierise eachPair
 
   # Augment jQuery selector with drip properties
   # Represents a single drip component
@@ -195,7 +195,7 @@ drip = window.drip = (->
   # Render any components that are children of sel
   renderAllIn = (sel, fn) ->
     comps = componentsIn sel
-    barrierEach comps, (cmp, done) ->
+    bEach comps, (done, cmp) ->
       renderComponent cmp, ->
         fn() if fn? and done()
 
@@ -260,7 +260,7 @@ drip = window.drip = (->
       injections = []
       injectNext = -> unless _.isEmpty injections
         injections.shift()()
-      barrierEachPair pairs, (replaceId, compName, done) ->
+      bEachPair pairs, (done, replaceId, compName) ->
         injections.push ->
           drip.inject compName,
             into: $ '#' + replaceId
@@ -314,8 +314,9 @@ drip = window.drip = (->
   # Return all maintained components
   components: components
   # Refresh the entire page
-  refreshPage: -> _.each components, (c) ->
-    c.refresh()
+  refreshPage: ->
+    bEach components, (done, c) ->
+      c.refresh()
   # Return object of current path params
   params: fsm.params
   # Publish a message for all subscribed
