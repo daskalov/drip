@@ -77,18 +77,37 @@ drip = window.drip = (->
     # setup / teardwon
     lifecycleEvents = eventSystem()
 
-    # Eval post render function in the context
-    # of a specific component
-    evalPostRender = (postFn) ->
+    # Functions exposed to a component's
+    # local scripting environment
+    clientHelpers = (->
+      clickBind = (selFn, pairs) ->
+        eachPair pairs, (id, fn) ->
+          selFn(id).click fn
       # Convenience wrapper for jQuery .submit
-      submitHelper = (accFn) -> (dId, fn) ->
-        el = accFn dId
+      submit: (dId, fn) ->
+        el = byDrip dId
         el.unbind('submit').submit ->
           fn()
           return false
       # Curry lifecycle setting
-      lifecycleSet = (evName) -> (fn) ->
+      lifecycleSet: (evName) -> (fn) ->
         lifecycleEvents.set evName, fn
+      # En-masse click setters
+      click:
+        drip: (pairs) -> clickBind byDrip, pairs
+        $:    (pairs) -> clickBind $,      pairs
+      # Single or multiple event receive declarator
+      receive: (name, fn) ->
+        if typeof name is 'string'
+          receiveEvents.set name, fn
+        else
+          eachPair name, (name, fn) ->
+            receiveEvents.set name, fn
+    )()
+
+    # Eval post render function in the context
+    # of a specific component
+    evalPostRender = (postFn) ->
       postFnStr = $(postFn).html()
       # Define the local interface exposed to
       # a component's post-render function
@@ -96,11 +115,12 @@ drip = window.drip = (->
         var d         = byDrip;
         var current   = sel;
         var c         = getComponent;
-        var receive   = receiveEvents.set;
+        var receive   = clientHelpers.receive;
         var subscribe = subscribeEvents.set;
-        var setup     = lifecycleSet('setup');
-        var teardown  = lifecycleSet('teardown');
-        var submit    = submitHelper(d);
+        var setup     = clientHelpers.lifecycleSet('setup');
+        var teardown  = clientHelpers.lifecycleSet('teardown');
+        var submit    = clientHelpers.submit;
+        var click     = clientHelpers.click;
       '''
       postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
       eval postFnStrPrime
