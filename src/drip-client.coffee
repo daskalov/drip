@@ -80,7 +80,7 @@ drip = window.drip = (->
     # Functions exposed to a component's
     # local scripting environment
     clientHelpers = (->
-      clickBind = (selFn, pairs) ->
+      clickBind = (selFn) -> (pairs) ->
         eachPair pairs, (id, fn) ->
           selFn(id).click fn
       # Convenience wrapper for jQuery .submit
@@ -94,8 +94,8 @@ drip = window.drip = (->
         lifecycleEvents.set evName, fn
       # En-masse click setters
       click:
-        drip: (pairs) -> clickBind byDrip, pairs
-        $:    (pairs) -> clickBind $,      pairs
+        drip: clickBind byDrip
+        $:    clickBind $
       # Single or multiple event receive declarator
       receive: (name, fn) ->
         if typeof name is 'string'
