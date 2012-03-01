@@ -92,6 +92,9 @@ drip = window.drip = (->
       # Curry lifecycle setting
       lifecycleSet: (evName) -> (fn) ->
         lifecycleEvents.set evName, fn
+      # Component send syntactic sugar
+      send: (compName, rest...) ->
+        getComponent(compName).send rest...
       # En-masse click setters
       click:
         drip: clickBind byDrip
@@ -121,6 +124,7 @@ drip = window.drip = (->
         var teardown  = clientHelpers.lifecycleSet('teardown');
         var submit    = clientHelpers.submit;
         var click     = clientHelpers.click;
+        var send      = clientHelpers.send;
       '''
       postFnStrPrime = "#{postFnPreStr}#{postFnStr}"
       eval postFnStrPrime
