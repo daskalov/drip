@@ -14,9 +14,8 @@ drip = window.drip = (->
   # Retrieve name of a component from a selector
   nameFromSel = (sel) -> sel.attr 'component'
 
-  # Call f for every key-value pair
-  eachPair = (c, f) ->
-    _.each _.keys(c), (k) -> f k, c[k]
+  # Call f with every key-value pair
+  eachPair = (c, f) -> _.each c, (v, k) -> f k, v
 
   # Barrier abstraction
   spend = (len, cbak) ->
