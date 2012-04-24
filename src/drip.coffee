@@ -62,8 +62,10 @@ cookieParser = (str) ->
       pair.val = plusToSpace cutQuotes pair.val
       try ret[pair.key] = decodeURIComponent pair.val
       catch err
-        if err instanceof URIError ret[pair.key] = pair.val
-        else                       throw err
+        if err instanceof URIError
+          ret[pair.key] = pair.val
+        else
+          throw err
   ret
 
 
